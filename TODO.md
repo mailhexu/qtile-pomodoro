@@ -1,0 +1,4 @@
+ I use qtile window manager and I want to have a APP that do a pomodoro.  It should be configurable, and can run in the background, providing notifications when it's time to take a break or get back to work. The app should allow me to set custom work and break intervals, and it should be possilbe to lock my screen for the duration of the break. Additionally, I would like the app to have a simple and intuitive user interface, with options to start, pause, and reset the timer. Ideally it should be very light-weighted. Then it should be easy to integrate with qtile, and provide a way to display the timer in the qtile bar or as a widget. It would be great if the app could also log completed pomodoro sessions and provide statistics on productivity over time. Finally, it should be compatible with Linux and have minimal dependencies to ensure smooth performance on my system.
+
+
+
