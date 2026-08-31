@@ -96,6 +96,20 @@ did nothing.
 - Daemon is spawned by Qtile's `startup_once` hook; it survives config
   reloads and Qtile restarts (duplicate-start is refused by probing the
   socket).
+
+### Daemon launch must use Qtile's interpreter
+
+`startup_once` originally spawned `~/.local/bin/qtile-pomodoro`, whose
+`#!/usr/bin/python3` shebang cannot import the package (user site-packages
+disabled via `PYTHONNOUSERSITE=1`). The daemon died instantly on every
+login; the bug surfaced only after a full gdm3 reboot killed the manually
+spawned daemon. Every launch site in `~/.config/qtile/config.py` now uses
+`sys.executable -m qtile_pomodoro.cli` instead.
+
+As a second line of defense, the widget self-heals: if `poll()` finds no
+service it spawns the daemon once (`start_new_session=True`) and re-arms
+the guard whenever the service answers again.
+
 - Integration in `~/.config/qtile/config.py`: widget import, `startup_once`
   daemon launch, and `mod+p` / `mod+shift+p` / `mod+ctrl+p` /
   `mod+ctrl+shift+p` / `mod+alt+p` keybindings.

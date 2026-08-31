@@ -99,10 +99,18 @@ class Pomodoro(base.InLoopPollText):
         super().__init__("Idle", **config)
         self.add_defaults(self.defaults)
         self.overlays: BreakOverlays | None = None
+        self._daemon_spawned = False
 
     def poll(self) -> str:
         state = _status()
-        if state is None: return "Pomodoro unavailable"
+        if state is None:
+            if not self._daemon_spawned:
+                # Self-heal: revive the Timer Service if it died with the session.
+                self._daemon_spawned = True
+                subprocess.Popen(_command("daemon"), start_new_session=True)
+                return "Pomodoro starting…"
+            return "Pomodoro unavailable"
+        self._daemon_spawned = False
         if self.overlays is None: self.overlays = BreakOverlays(self.qtile)
         self.overlays.sync(state)
         if state["status"] == "idle": return "Idle"
