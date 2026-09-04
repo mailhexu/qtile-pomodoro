@@ -37,13 +37,14 @@ Add this to `config.py`:
 ```python
 import subprocess
 from libqtile import hook, widget
-from qtile_pomodoro.qtile import Pomodoro
+from qtile_pomodoro.task_widget import TaskCount, TaskOverlay
 
 @hook.subscribe.startup_once
 def start_pomodoro():
     subprocess.Popen(["qtile-pomodoro", "daemon"])
 
-# Add Pomodoro() to a bar's widgets list.
+# Add Pomodoro() and TaskCount() to a bar's widgets list; bind Mod+N:
+Key([mod], "n", lazy.function(lambda qtile: TaskOverlay.toggle(qtile)))
 ```
 
 The widget is display-only. Bind Qtile keys to these commands:
@@ -53,6 +54,19 @@ qtile-pomodoro start | pause | reset | skip | reload | stats
 ```
 
 `start` resumes or starts focus. A completed focus interval starts a break and shows a full-screen overlay on every X11 screen. Clicking its single **Skip Break** control starts focus immediately. A completed or reset break enters **Ready to work**; press Space in the resume surface or invoke `qtile-pomodoro start`.
+
+## Task overlay
+
+A daemonless, Qtile-native task list: `Mod+N` (or clicking `Tasks:N` in the
+bar) opens a centered popup with **Today** and **Inbox** lists.
+
+- Type to add; `Tab` picks the target list; `Enter` commits.
+- `j`/`k` move the highlight, `d` completes, `m` moves between lists;
+  clicking a row completes it.
+- `Esc` backs out of typing, then closes.
+
+Tasks persist in `$XDG_DATA_HOME/qtile-pomodoro/tasks.json`; completions are
+retained (hidden) as history. Independent of the Pomodoro daemon.
 
 ## Semantics
 

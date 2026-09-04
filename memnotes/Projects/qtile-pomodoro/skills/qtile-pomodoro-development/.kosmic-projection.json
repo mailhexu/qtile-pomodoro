@@ -1,0 +1,18 @@
+{
+  "generator_version": 2,
+  "name": "qtile-pomodoro-development",
+  "project_id": "qtile-pomodoro",
+  "requires": [
+    "qtile-pomodoro-usage"
+  ],
+  "role": "development",
+  "sources": [
+    {
+      "audience": "development",
+      "path": "notes/qtile-integration.md",
+      "reference": "references/qtile-integration.md",
+      "sha256": "bc1c0dc404d6a227aa807daeee40168896dcd8035389e37d358c91d7d308befe"
+    }
+  ],
+  "working_state": "working-tree"
+}

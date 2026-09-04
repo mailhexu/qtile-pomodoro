@@ -1,0 +1,22 @@
+{
+  "generator_version": 2,
+  "name": "qtile-pomodoro-usage",
+  "project_id": "qtile-pomodoro",
+  "requires": [],
+  "role": "usage",
+  "sources": [
+    {
+      "audience": "usage",
+      "path": "notes/using-the-task-overlay.md",
+      "reference": "references/using-the-task-overlay.md",
+      "sha256": "deb2e2b5b37bfd97b8230228f8cb5ede1f7c017fbc650f3432b6cd852e920d2c"
+    },
+    {
+      "audience": "usage",
+      "path": "notes/using-the-timer.md",
+      "reference": "references/using-the-timer.md",
+      "sha256": "9291c267ac76e39b25e1cbd0a0955e3bfe73c107bb311786c62184f21d6113af"
+    }
+  ],
+  "working_state": "working-tree"
+}
