@@ -63,6 +63,7 @@ bar) opens a centered popup with **Today** and **Inbox** lists.
 - Type to add; `Tab` picks the target list; `Enter` commits.
 - `j`/`k` move the highlight, `d` completes, `m` moves between lists;
   clicking a row completes it.
+- A dimmed **Done (N)** section shows the 5 most recent completions.
 - `Esc` backs out of typing, then closes.
 
 Tasks persist in `$XDG_DATA_HOME/qtile-pomodoro/tasks.json`; completions are
