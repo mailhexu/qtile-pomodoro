@@ -13,3 +13,4 @@
 - Live verification: bar count tracking, persistence across restart, full overlay cycle by user (add/complete/move/click).
 - Code review rounds 1-2 FAIL (6 blockers: Mod+N collision, cursor offset, click geometry, corrupt-recovery, spec deviations); all fixed with user-requested changes (d to complete, direct typing, highlight bar).
 - Round 3 review PASS. Stories and epic marked done.
+- Quick task: added display-only Done (N) section to the overlay (recent completions, dim, capped at 5, popup 520px). Verified via screenshot; committed.

@@ -60,9 +60,10 @@ class TaskOverlay:
     """Centered popup listing Today/Inbox with a keyboard line editor."""
 
     _current: "TaskOverlay | None" = None
-    WIDTH, HEIGHT = 700, 420
+    WIDTH, HEIGHT = 700, 520
     LINE_HEIGHT = 22
     HEADER_Y = 16
+    DONE_SHOWN = 5
     def __init__(self, qtile: Any):
         self.qtile = qtile
         self.store = get_store()
@@ -90,6 +91,8 @@ class TaskOverlay:
 
         self.today_header = _layout("#5fafff")
         self.inbox_header = _layout("#d75f5f")
+        self.done_header = _layout("#808080")
+        self.done_items = _layout("#808080")
         self.today_items = _layout("#ffffff")
         self.inbox_items = _layout("#ffffff")
         self.input_line = _layout("#ffffff")
@@ -130,7 +133,8 @@ class TaskOverlay:
         tasks: list[tuple[str, Any]] = \
             [("today", t) for t in self.store.today] + \
             [("inbox", t) for t in self.store.inbox]
-        max_rows = (self.HEIGHT - 110 - 2 * self.LINE_HEIGHT) // self.LINE_HEIGHT
+        max_rows = (self.HEIGHT - 110 - 2 * self.LINE_HEIGHT
+                    - self.DONE_SHOWN * self.LINE_HEIGHT) // self.LINE_HEIGHT
         shown = tasks[:max_rows]
         # keep the Inbox section header visible even when its items are cut
         today_shown = sum(1 for name, _ in shown if name == "today")
@@ -152,6 +156,16 @@ class TaskOverlay:
             y += self.LINE_HEIGHT
         if len(tasks) > max_rows:
             rows.append({"kind": "more", "count": len(tasks) - max_rows, "y": y})
+            y += self.LINE_HEIGHT
+        done = list(reversed(self.store.completed))[:self.DONE_SHOWN]
+        rows.append({"kind": "done_header", "count": len(self.store.completed), "y": y})
+        y += self.LINE_HEIGHT
+        for task in done:
+            rows.append({"kind": "done", "task": task, "y": y})
+            y += self.LINE_HEIGHT
+        if len(self.store.completed) > self.DONE_SHOWN:
+            rows.append({"kind": "done_more",
+                         "count": len(self.store.completed) - self.DONE_SHOWN, "y": y})
         return rows
 
     def _on_click(self, x: int, y: int, button: int) -> None:
@@ -170,6 +184,7 @@ class TaskOverlay:
         popup.clear()
         today_titles: list[str] = []
         inbox_titles: list[str] = []
+        done_titles: list[str] = []
         selected_y: int | None = None
         for row in self._visible_rows():
             if row["kind"] == "header":
@@ -180,6 +195,14 @@ class TaskOverlay:
                 self.inbox_header.draw(20, row["y"])
             elif row["kind"] == "more":
                 self.hint.text = f"… {row['count']} more"
+                self.hint.draw(20, row["y"])
+            elif row["kind"] == "done_header":
+                self.done_header.text = f"Done ({row['count']})"
+                self.done_header.draw(20, row["y"])
+            elif row["kind"] == "done":
+                done_titles.append(f"  ✓ {row['task'].title}")
+            elif row["kind"] == "done_more":
+                self.hint.text = f"… {row['count']} more done"
                 self.hint.draw(20, row["y"])
             else:
                 (today_titles if row["task"] in self.store.today else inbox_titles)\
@@ -198,6 +221,10 @@ class TaskOverlay:
                               (self.inbox_items, inbox_titles)):
             if titles:
                 block.text = "\n".join(titles)
+        if done_titles:
+            self.done_items.text = "\n".join(done_titles)
+            done_y = next(r["y"] for r in self._visible_rows() if r["kind"] == "done")
+            self.done_items.draw(20, done_y)
 
         today_y = next((r["y"] for r in self._visible_rows()
                         if r["kind"] == "task" and r["task"] in self.store.today), None)
