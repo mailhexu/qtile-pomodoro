@@ -97,17 +97,19 @@ class SyncEngine:
     completion via qtile.call_soon_threadsafe.
     """
 
-    def __init__(self, store, client):
+    def __init__(self, store, client, autokick: bool = True):
         self.store = store
         self.client = client
         self._lock = threading.RLock()
         self._dirty = False
         self._id_map: dict[str, str] = {}
+        self._running = False
+        self._autokick = autokick  # False in tests driving refresh() directly
 
     # -- UI thread --------------------------------------------------------
 
     def enqueue(self, cmd: str, args: dict, local_apply, temp_id: str | None = None):
-        """Apply a mutation locally, queue it for Todoist, persist."""
+        """Apply a mutation locally, queue it for Todoist, persist, kick."""
         with self._lock:
             local_apply()
             if len(self.store.sync["queue"]) >= QUEUE_CAP:
@@ -119,6 +121,30 @@ class SyncEngine:
                 self.store.sync["queue"].append(entry)
             self._dirty = True
             self.store._save()
+        if self._autokick:
+            self.kick()  # write-through: mutations reach Todoist in-session
+
+    def refresh_async(self, done=None, qtile=None) -> None:
+        """Single-flight worker refresh; optional threadsafe completion."""
+        with self._lock:
+            if self._running:
+                return  # running worker exits into the dirty-chained refresh
+            self._running = True
+
+        def run() -> None:
+            try:
+                self.refresh()
+            finally:
+                self._running = False
+            if done is not None and qtile is not None:
+                qtile.call_soon_threadsafe(done)
+
+        threading.Thread(target=run, daemon=True).start()
+
+    def kick(self) -> None:
+        """Start a worker refresh if none is running (returns immediately)."""
+        self.refresh_async()
+
 
     @property
     def pending_count(self) -> int:
@@ -147,9 +173,18 @@ class SyncEngine:
         if chained:
             self.refresh()
 
+    @staticmethod
+    def _wire(entry: dict) -> dict:
+        """v1 wire shape: {type, uuid, [temp_id], args} — internal keys dropped."""
+        cmd = {"type": entry["cmd"], "uuid": entry["uuid"],
+               "args": entry["args"]}
+        if "temp_id" in entry:
+            cmd["temp_id"] = entry["temp_id"]
+        return cmd
+
     def _drain(self, batch: list[dict]) -> None:
         try:
-            mapping, _ = self.client.send(batch)
+            mapping, _ = self.client.send([self._wire(e) for e in batch])
         except CommandError as exc:
             with self._lock:
                 kept = []
@@ -167,8 +202,12 @@ class SyncEngine:
             return  # network down: whole batch stays queued
         with self._lock:
             self._apply_mapping(mapping)
-            self.store.sync["queue"] = []
+            sent = {e["uuid"] for e in batch}
+            # keep only entries enqueued AFTER our snapshot (late UI writes)
+            self.store.sync["queue"] = [e for e in self.store.sync["queue"]
+                                        if e["uuid"] not in sent]
             self.store._save()
+
 
     def _apply_mapping(self, mapping: dict[str, str]) -> None:
         """temp_id -> real id: rewrite task ids and remaining queued args."""
@@ -207,9 +246,10 @@ class SyncEngine:
             elif due and due <= today:  # overdue included (Today view)
                 new_today.append(task)
         fetched = {t.id for t in new_inbox + new_today}
-        keep = [t for t in store.inbox + store.today
-                if (t.origin == "local" or t.id in pending)
-                and t.id not in fetched]
-        new_today.extend(keep)
+        def survives(t: Task) -> bool:
+            return (t.origin == "local" or t.id in pending) \
+                and t.id not in fetched
+        new_inbox.extend(t for t in store.inbox if survives(t))
+        new_today.extend(t for t in store.today if survives(t))
         store.inbox = new_inbox
         store.today = new_today

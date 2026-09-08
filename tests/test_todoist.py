@@ -186,7 +186,7 @@ def test_save_omits_sync_when_untouched(tmp_path):
 
 def test_enqueue_applies_locally_and_persists_queue(tmp_path):
     store = _store(tmp_path)
-    eng = SyncEngine(store, FakeClient())
+    eng = SyncEngine(store, FakeClient(), autokick=False)
     eng.enqueue("item_close", {"id": "x"}, lambda: store.complete("x"))
     assert store.sync["queue"][0]["cmd"] == "item_close"
     assert "uuid" in store.sync["queue"][0]
@@ -198,7 +198,7 @@ def test_enqueue_applies_locally_and_persists_queue(tmp_path):
 def test_drain_applies_temp_id_mapping_and_rewrites_queue(tmp_path):
     store = _store(tmp_path)
     fake = FakeClient()
-    eng = SyncEngine(store, fake)
+    eng = SyncEngine(store, fake, autokick=False)
     task = store.inbox[0] if store.inbox else None
     # offline add then complete: create queued with temp_id, close references it
     eng.enqueue("item_add", {"content": "x", "project_id": "INBOX"},
@@ -220,7 +220,7 @@ def test_drain_applies_temp_id_mapping_and_rewrites_queue(tmp_path):
 def test_failed_command_retried_then_dropped_after_three(tmp_path):
     store = _store(tmp_path)
     fake = FakeClient()
-    eng = SyncEngine(store, fake)
+    eng = SyncEngine(store, fake, autokick=False)
     eng.enqueue("item_close", {"id": "dead"}, lambda: None)
     from qtile_pomodoro.todoist import CommandError
     bad_uuid = store.sync["queue"][0]["uuid"]
@@ -236,7 +236,7 @@ def test_failed_command_retried_then_dropped_after_three(tmp_path):
 def test_network_error_keeps_batch(tmp_path):
     store = _store(tmp_path)
     fake = FakeClient()
-    eng = SyncEngine(store, fake)
+    eng = SyncEngine(store, fake, autokick=False)
     eng.enqueue("item_close", {"id": "x"}, lambda: None)
     from qtile_pomodoro.todoist import TodoistError
     fake.batch_results.append(TodoistError("down"))
@@ -258,7 +258,7 @@ def test_reconcile_replaces_todoist_origin_and_keeps_local(tmp_path):
              "checked": True, "is_deleted": False, "due": None},
         ],
         "user": {"inbox_project_id": "INBOX"}, "sync_token": "t"}
-    eng = SyncEngine(store, fake)
+    eng = SyncEngine(store, fake, autokick=False)
     eng.refresh()
     assert [t.title for t in store.inbox] == ["web task"]
     assert [t.title for t in store.today] == ["due task", "old local task"]
@@ -268,7 +268,7 @@ def test_reconcile_replaces_todoist_origin_and_keeps_local(tmp_path):
 def test_pending_mutations_shield_tasks_from_overwrite(tmp_path):
     store = _store(tmp_path)
     fake = FakeClient()
-    eng = SyncEngine(store, fake)
+    eng = SyncEngine(store, fake, autokick=False)
     task = store.today[0]
     eng.enqueue("item_update", {"id": task.id}, lambda: None)
     # fetched set does NOT contain the task (e.g. completed elsewhere),
@@ -279,7 +279,7 @@ def test_pending_mutations_shield_tasks_from_overwrite(tmp_path):
 
 def test_queue_capped_at_100(tmp_path):
     store = _store(tmp_path)
-    eng = SyncEngine(store, FakeClient())
+    eng = SyncEngine(store, FakeClient(), autokick=False)
     for i in range(105):
         eng.enqueue("item_close", {"id": str(i)}, lambda: None)
     assert len(store.sync["queue"]) == 100
@@ -289,7 +289,7 @@ def test_queue_capped_at_100(tmp_path):
 def test_dirty_during_refresh_chains(tmp_path):
     store = _store(tmp_path)
     fake = FakeClient()
-    eng = SyncEngine(store, fake)
+    eng = SyncEngine(store, fake, autokick=False)
     seen = []
 
     def slow_read():
@@ -303,3 +303,49 @@ def test_dirty_during_refresh_chains(tmp_path):
     # first pass saw the late enqueue -> dirty -> second drain/read
     assert seen == ["read", "read"] or len(seen) == 2
     assert store.sync["queue"] == []
+
+
+def test_wire_shape_uses_type_not_cmd(tmp_path):
+    store = _store(tmp_path)
+    fake = FakeClient()
+    eng = SyncEngine(store, fake, autokick=False)
+    eng.enqueue("item_close", {"id": "x"}, lambda: None)
+    fake.batch_results.append(({}, {}))
+    eng.refresh()
+    sent = fake.sent[0]
+    assert all("cmd" not in c and "failures" not in c for c in sent)
+    assert sent[0]["type"] == "item_close"
+    assert "uuid" in sent[0] and "args" in sent[0]
+
+
+def test_late_enqueue_during_drain_survives(tmp_path):
+    store = _store(tmp_path)
+    fake = FakeClient()
+    eng = SyncEngine(store, fake, autokick=False)
+    eng.enqueue("item_close", {"id": "early"}, lambda: None)
+    orig_send = fake.send
+
+    def slow_send(commands):
+        eng.enqueue("item_close", {"id": "late"}, lambda: None)  # mid-flight
+        return orig_send(commands)
+    fake.send = slow_send
+    fake.batch_results.append(({}, {}))
+    from qtile_pomodoro.todoist import TodoistError
+    fake.read = lambda: (_ for _ in ()).throw(TodoistError("down"))
+    eng.refresh()  # read fails: no dirty-chained second drain this pass
+    remaining = [e["args"]["id"] for e in store.sync["queue"]]
+    assert remaining == ["late"]  # early sent; late kept for next drain
+
+
+def test_inbox_survivors_stay_in_inbox(tmp_path):
+    store = TaskStore(path=tmp_path / "tasks.json")
+    store.add("local inbox task", "inbox")
+    fake = FakeClient()
+    fake.read_payload = {"items": [
+        {"id": "T1", "content": "web", "project_id": "INBOX",
+         "checked": False, "is_deleted": False, "due": None}],
+        "user": {"inbox_project_id": "INBOX"}, "sync_token": "t"}
+    eng = SyncEngine(store, fake, autokick=False)
+    eng.refresh()
+    assert [t.title for t in store.inbox] == ["web", "local inbox task"]
+    assert store.today == []

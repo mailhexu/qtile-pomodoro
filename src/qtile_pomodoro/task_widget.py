@@ -150,21 +150,19 @@ class TaskOverlay:
             if self._alive and self.store.sync["revision"] != seen:
                 self._draw()
 
-        def run() -> None:
-            engine.refresh()
-            self.qtile.call_soon_threadsafe(done)
-
-        import threading
-        threading.Thread(target=run, daemon=True).start()
+        engine.refresh_async(done, self.qtile)  # single-flight worker
 
     def _on_key(self, keysym: int) -> None:
+        # 'r' force-refresh must be intercepted in nav mode BEFORE the
+        # model routes any non-nav printable into input mode
+        if (chr(keysym) == "r" and self.model.mode == "nav"
+                and not self.model.input):
+            self._refresh_async()
+            return
         redraw, close = self.model.key(keysym)
         if close:
             self.close()
-            return
-        if chr(keysym) == "r" and self.model.mode == "nav":
-            self._refresh_async()  # force refresh (FR3)
-        if redraw:
+        elif redraw:
             self._draw()
 
     def _visible_rows(self) -> list[dict[str, Any]]:
