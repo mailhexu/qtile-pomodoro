@@ -18,3 +18,10 @@
   keysym guard) (065ee7e); restored _id_map/TaskStore clobbered in an edit
   (7f6d745). 40/40 tests; deployed; no-token mode screenshot-verified.
 - Pending: live probe + live smoke — blocked on user's Todoist API token.
+- Token via user's ~/.bashrc TODOIST_API_TOKEN (env → config → bash
+  fallback loader). Live probe pinned all v1 shapes (see story 4 notes);
+  due.date is full RFC3339 → [:10] compare fix.
+- Live smoke passed end-to-end: refresh-on-open reconciles; adds and
+  completes write through and verified against the live API. Three
+  edit-collision regressions (kick/_running/TaskStore) caught by live
+  smoke and fixed. Epic 2 done (7f6d745..HEAD).

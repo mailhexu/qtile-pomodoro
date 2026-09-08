@@ -103,6 +103,7 @@ class SyncEngine:
         self._lock = threading.RLock()
         self._dirty = False
         self._id_map: dict[str, str] = {}
+        self._running = False
         self._autokick = autokick  # False in tests driving refresh() directly
         self._done: list[tuple] = []  # (callback, qtile) awaiting completion
 
@@ -151,6 +152,10 @@ class SyncEngine:
                     cb()
 
         threading.Thread(target=run, daemon=True).start()
+
+    def kick(self) -> None:
+        """Start a worker refresh if none is running (returns immediately)."""
+        self.refresh_async()
 
 
     @property
@@ -233,14 +238,14 @@ class SyncEngine:
 
     def _reconcile(self, data: dict) -> None:
         """Set-replace todoist-origin tasks; local + pending survive."""
+        new_inbox: list[Task] = []
+        new_today: list[Task] = []
         store = self.store
         inbox_id = (data.get("user") or {}).get("inbox_project_id")
         today = datetime.date.today().isoformat()
         pending = {e["args"].get("id") for e in store.sync["queue"]}
         pending |= {e.get("temp_id") for e in store.sync["queue"]}
         pending.discard(None)
-        new_inbox: list[Task] = []
-        new_today: list[Task] = []
         for item in data.get("items", []):
             if item.get("checked") or item.get("is_deleted"):
                 continue  # completed/deleted elsewhere: drop from lists
@@ -250,7 +255,9 @@ class SyncEngine:
             due = (item.get("due") or {}).get("date")
             if inbox_id and item.get("project_id") == inbox_id:
                 new_inbox.append(task)
-            elif due and due <= today:  # overdue included (Today view)
+            elif due and due[:10] <= today:
+                # overdue included (Today view); date part only — due.date
+                # is full RFC3339 UTC (local midnight = prior day in Z)
                 new_today.append(task)
         fetched = {t.id for t in new_inbox + new_today}
         def survives(t: Task) -> bool:

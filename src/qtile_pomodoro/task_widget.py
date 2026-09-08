@@ -19,14 +19,32 @@ from .task_model import (HINT_COLOUR, INBOX_COLOUR, OverlayModel, TEXT_COLOUR,
 
 
 def _todoist_token() -> str | None:
+    """Token source: env var, config.toml, or the user's interactive shell.
+
+    Qtile does not inherit ~/.bashrc exports, so as a last resort we ask an
+    interactive bash once (the token never touches disk).
+    """
+    token = os.environ.get("TODOIST_API_TOKEN")
+    if token:
+        return token
     try:
         import tomllib
         path = (Path(os.environ.get("XDG_CONFIG_HOME",
                                     Path.home() / ".config"))
                 / "qtile-pomodoro" / "config.toml")
         with open(path, "rb") as fh:
-            return tomllib.load(fh).get("tasks", {}).get("todoist_api_token")
+            token = tomllib.load(fh).get("tasks", {}).get("todoist_api_token")
+        if token:
+            return token
     except (OSError, ValueError):
+        pass
+    import subprocess
+    try:
+        out = subprocess.run(
+            ["bash", "-ic", 'printf %s "$TODOIST_API_TOKEN"'],
+            capture_output=True, text=True, timeout=10)
+        return out.stdout.strip() or None
+    except (OSError, subprocess.SubprocessError):
         return None
 
 

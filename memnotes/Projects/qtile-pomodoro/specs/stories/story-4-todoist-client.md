@@ -46,3 +46,16 @@ the sync engine can be built against verified facts.
 ## Notes (partial)
 
 - Client + unit tests complete (da291b8). Live probe pending user token.
+
+## Probe results (2026-09-08, live account)
+
+- `read()` response keys: full_sync, items, sync_status, sync_token,
+  temp_id_mapping, user. `user.inbox_project_id` present.
+- `items[]` carries id, content, project_id, checked, is_deleted, due
+  {date (full RFC3339 UTC), string, timezone, is_recurring}, added_at.
+  **due.date is a full timestamp** → reconcile compares `due[:10]`.
+- `item_add` + `temp_id` → `temp_id_mapping` returns the real id.
+- `item_update` args `{id, due: {"string": "today"}}` sets due;
+  `{id, due: null}` clears it — both verified semantically.
+- `item_close` archives the task; item disappears from `items`.
+- Scratch task lifecycle run and cleaned up.
