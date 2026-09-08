@@ -69,6 +69,20 @@ bar) opens a centered popup with **Today** and **Inbox** lists.
 Tasks persist in `$XDG_DATA_HOME/qtile-pomodoro/tasks.json`; completions are
 retained (hidden) as history. Independent of the Pomodoro daemon.
 
+**Todoist sync** (optional): add a Todoist API token to the config:
+
+```toml
+[tasks]
+todoist_api_token = "…"
+```
+
+The overlay then becomes a Todoist client — Today = tasks due today
+(overdue included), Inbox = the Todoist Inbox project, with add /
+complete / move writing through to Todoist. The JSON file is a cache:
+the overlay opens instantly offline and queued changes replay on
+reconnect (`↻N` shows pending writes; `r` forces a refresh). Without a
+token, everything stays purely local.
+
 ## Semantics
 
 - Only focus intervals reaching zero count in statistics.

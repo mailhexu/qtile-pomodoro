@@ -42,3 +42,7 @@ the sync engine can be built against verified facts.
 ## Notes
 
 (to be filled by the probe)
+
+## Notes (partial)
+
+- Client + unit tests complete (da291b8). Live probe pending user token.

@@ -36,3 +36,7 @@ seconds, my actions reach Todoist, and pending/offline state is visible
 ## Notes
 
 (none yet)
+
+## Notes (partial)
+
+- Wiring + review complete (7f6d745). Live smoke pending user token.
