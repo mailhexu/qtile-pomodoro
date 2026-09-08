@@ -12,10 +12,8 @@ from typing import Any
 
 from libqtile.popup import Popup
 from libqtile.widget import base
-
-from .tasks import TaskStore
 from .task_model import (HINT_COLOUR, INBOX_COLOUR, OverlayModel, TEXT_COLOUR,
-                         TODAY_COLOUR, format_count)
+                         TODAY_COLOUR, format_count, keysym_to_char)
 
 
 def _todoist_token() -> str | None:
@@ -154,8 +152,9 @@ class TaskOverlay:
 
     def _on_key(self, keysym: int) -> None:
         # 'r' force-refresh must be intercepted in nav mode BEFORE the
-        # model routes any non-nav printable into input mode
-        if (chr(keysym) == "r" and self.model.mode == "nav"
+        # model routes any non-nav printable into input mode; keysym_to_char
+        # range-checks (media keysyms exceed chr()'s domain)
+        if (keysym_to_char(keysym) == "r" and self.model.mode == "nav"
                 and not self.model.input):
             self._refresh_async()
             return

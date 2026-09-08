@@ -102,9 +102,9 @@ class SyncEngine:
         self.client = client
         self._lock = threading.RLock()
         self._dirty = False
-        self._id_map: dict[str, str] = {}
         self._running = False
         self._autokick = autokick  # False in tests driving refresh() directly
+        self._done: list[tuple] = []  # (callback, qtile) awaiting completion
 
     # -- UI thread --------------------------------------------------------
 
@@ -127,23 +127,30 @@ class SyncEngine:
     def refresh_async(self, done=None, qtile=None) -> None:
         """Single-flight worker refresh; optional threadsafe completion."""
         with self._lock:
+            if done is not None:
+                self._done.append((done, qtile))
             if self._running:
-                return  # running worker exits into the dirty-chained refresh
+                return  # running worker fires our callback at completion
             self._running = True
 
         def run() -> None:
             try:
-                self.refresh()
+                while True:
+                    self.refresh()
+                    with self._lock:  # atomic vs enqueue's set-then-kick;
+                        if not self._dirty:  # also covers failed reads that
+                            break  # skipped refresh's own chained check
             finally:
-                self._running = False
-            if done is not None and qtile is not None:
-                qtile.call_soon_threadsafe(done)
+                with self._lock:
+                    self._running = False
+                    callbacks, self._done = self._done, []
+            for cb, qt in callbacks:
+                if qt is not None:
+                    qt.call_soon_threadsafe(cb)
+                else:
+                    cb()
 
         threading.Thread(target=run, daemon=True).start()
-
-    def kick(self) -> None:
-        """Start a worker refresh if none is running (returns immediately)."""
-        self.refresh_async()
 
 
     @property
