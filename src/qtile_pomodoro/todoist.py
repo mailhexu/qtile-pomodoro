@@ -102,7 +102,7 @@ class SyncEngine:
         self.client = client
         self._lock = threading.RLock()
         self._dirty = False
-        self._running = False
+        self._id_map: dict[str, str] = {}
         self._autokick = autokick  # False in tests driving refresh() directly
         self._done: list[tuple] = []  # (callback, qtile) awaiting completion
 

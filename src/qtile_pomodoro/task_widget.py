@@ -12,6 +12,8 @@ from typing import Any
 
 from libqtile.popup import Popup
 from libqtile.widget import base
+
+from .tasks import TaskStore
 from .task_model import (HINT_COLOUR, INBOX_COLOUR, OverlayModel, TEXT_COLOUR,
                          TODAY_COLOUR, format_count, keysym_to_char)
 
