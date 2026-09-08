@@ -25,3 +25,7 @@
   completes write through and verified against the live API. Three
   edit-collision regressions (kick/_running/TaskStore) caught by live
   smoke and fixed. Epic 2 done (7f6d745..HEAD).
+- Wrote MACOS_PORT.md: self-contained handoff spec for porting the full
+  functionality to a native macOS agent (contracts, UX keymap, sync
+  semantics, pitfalls, acceptance). Four stdlib modules port verbatim;
+  UI layers rewritten (NSPanel/NSStatusItem/LaunchAgent/Keychain).
