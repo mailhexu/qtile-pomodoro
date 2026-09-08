@@ -20,6 +20,7 @@ class Task:
     title: str
     created_at: str
     completed_at: str | None = None
+    origin: str = "local"  # "todoist" once synced (absent in old files)
 
     @classmethod
     def new(cls, title: str) -> "Task":
@@ -34,6 +35,8 @@ class TaskStore:
         self.inbox: list[Task] = []
         self.today: list[Task] = []
         self.completed: list[Task] = []
+        self.sync: dict = {"queue": [], "token": None, "revision": 0}
+        self._overflow = False
         self.reload()
 
     def reload(self) -> None:
@@ -45,10 +48,16 @@ class TaskStore:
             self.inbox = [Task(**t) for t in data.get("inbox", [])]
             self.today = [Task(**t) for t in data.get("today", [])]
             self.completed = [Task(**t) for t in data.get("completed", [])]
+            sync = data.get("sync")
+            if isinstance(sync, dict):  # additive; absent pre-migration
+                self.sync = {"queue": list(sync.get("queue", [])),
+                             "token": sync.get("token"),
+                             "revision": int(sync.get("revision", 0))}
         except (ValueError, TypeError, KeyError, AttributeError, OSError):
             corrupt = self.path.with_suffix(".json.corrupt")
             os.replace(self.path, corrupt)
             self.inbox, self.today, self.completed = [], [], []
+            self.sync = {"queue": [], "token": None, "revision": 0}
 
     def _save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -56,6 +65,8 @@ class TaskStore:
                    "inbox": [asdict(t) for t in self.inbox],
                    "today": [asdict(t) for t in self.today],
                    "completed": [asdict(t) for t in self.completed]}
+        if self.sync["queue"] or self.sync["token"] is not None:
+            payload["sync"] = self.sync
         tmp = self.path.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(payload, indent=2))
         os.replace(tmp, self.path)

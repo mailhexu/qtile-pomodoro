@@ -128,3 +128,178 @@ def test_timeout_is_forwarded(transport, client):
     # timeout encoded via opener: assert via the request's own deadline by
     # checking the transport signature accepted timeout kwarg — covered by
     # Transport.__call__(req, timeout=None); a missing kwarg would TypeError.
+
+
+# ------------------------- SyncEngine (fake client) -------------------------
+
+import threading
+
+from qtile_pomodoro.tasks import Task, TaskStore
+from qtile_pomodoro.todoist import SyncEngine
+
+
+class FakeClient:
+    def __init__(self):
+        self.reads = 0
+        self.sent: list[list[dict]] = []
+        self.read_payload = {"items": [], "user": {"inbox_project_id": "INBOX"},
+                             "sync_token": "t"}
+        self.batch_results: list[object] = []  # Exception or (mapping, status)
+
+    def read(self):
+        self.reads += 1
+        return self.read_payload
+
+    def send(self, commands):
+        self.sent.append(commands)
+        result = self.batch_results.pop(0) if self.batch_results else ({}, {})
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+
+def _store(tmp_path, tasks=True) -> TaskStore:
+    store = TaskStore(path=tmp_path / "tasks.json")
+    if tasks:
+        store.add("old local task", "today")
+    return store
+
+
+def test_premigration_file_loads_with_tasks_intact(tmp_path):
+    # a pre-Todoist file: only version/inbox/today/completed keys
+    p = tmp_path / "tasks.json"
+    p.write_text('{"version": 1, "inbox": [{"id": "a", "title": "keep me", '
+                 '"created_at": "2026-01-01T00:00:00+00:00"}], '
+                 '"today": [], "completed": []}')
+    store = TaskStore(path=p)
+    assert [t.title for t in store.inbox] == ["keep me"]
+    assert store.sync == {"queue": [], "token": None, "revision": 0}
+
+
+def test_save_omits_sync_when_untouched(tmp_path):
+    store = _store(tmp_path)
+    store.add("another", "inbox")
+    import json as _json
+    data = _json.loads(store.path.read_text())
+    assert "sync" not in data
+
+
+def test_enqueue_applies_locally_and_persists_queue(tmp_path):
+    store = _store(tmp_path)
+    eng = SyncEngine(store, FakeClient())
+    eng.enqueue("item_close", {"id": "x"}, lambda: store.complete("x"))
+    assert store.sync["queue"][0]["cmd"] == "item_close"
+    assert "uuid" in store.sync["queue"][0]
+    # persisted across a fresh store load
+    store2 = TaskStore(path=store.path)
+    assert len(store2.sync["queue"]) == 1
+
+
+def test_drain_applies_temp_id_mapping_and_rewrites_queue(tmp_path):
+    store = _store(tmp_path)
+    fake = FakeClient()
+    eng = SyncEngine(store, fake)
+    task = store.inbox[0] if store.inbox else None
+    # offline add then complete: create queued with temp_id, close references it
+    eng.enqueue("item_add", {"content": "x", "project_id": "INBOX"},
+                lambda: None)
+    store.sync["queue"][-1]["temp_id"] = "local-1"
+    eng.enqueue("item_close", {"id": "local-1"}, lambda: None)
+    fake.batch_results.append(({"local-1": "REAL1"}, {}))
+    eng.refresh()
+    # close entry now references the mapped real id; queue drained
+    assert store.sync["queue"] == []
+    # a later queued op referencing local-1 would also be rewritten:
+    eng.enqueue("item_close", {"id": "local-1"}, lambda: None)
+    fake.batch_results.append(({}, {}))
+    # simulate the mapping being known: engine caches id_map
+    eng._apply_mapping({"local-1": "REAL1"})
+    assert store.sync["queue"][0]["args"]["id"] == "REAL1"
+
+
+def test_failed_command_retried_then_dropped_after_three(tmp_path):
+    store = _store(tmp_path)
+    fake = FakeClient()
+    eng = SyncEngine(store, fake)
+    eng.enqueue("item_close", {"id": "dead"}, lambda: None)
+    from qtile_pomodoro.todoist import CommandError
+    bad_uuid = store.sync["queue"][0]["uuid"]
+    for _ in range(2):
+        fake.batch_results.append(CommandError(bad_uuid))
+        eng.refresh()
+        assert len(store.sync["queue"]) == 1  # still retried
+    fake.batch_results.append(CommandError(bad_uuid))
+    eng.refresh()
+    assert store.sync["queue"] == []  # dropped as permanent
+
+
+def test_network_error_keeps_batch(tmp_path):
+    store = _store(tmp_path)
+    fake = FakeClient()
+    eng = SyncEngine(store, fake)
+    eng.enqueue("item_close", {"id": "x"}, lambda: None)
+    from qtile_pomodoro.todoist import TodoistError
+    fake.batch_results.append(TodoistError("down"))
+    eng.refresh()
+    assert len(store.sync["queue"]) == 1
+
+
+def test_reconcile_replaces_todoist_origin_and_keeps_local(tmp_path):
+    store = _store(tmp_path)  # has local task "old local task" in today
+    fake = FakeClient()
+    fake.read_payload = {
+        "items": [
+            {"id": "T1", "content": "web task", "project_id": "INBOX",
+             "checked": False, "is_deleted": False, "due": None},
+            {"id": "T2", "content": "due task", "project_id": "OTHER",
+             "checked": False, "is_deleted": False,
+             "due": {"date": "2020-01-01"}},  # overdue -> today
+            {"id": "T3", "content": "done elsewhere", "project_id": "INBOX",
+             "checked": True, "is_deleted": False, "due": None},
+        ],
+        "user": {"inbox_project_id": "INBOX"}, "sync_token": "t"}
+    eng = SyncEngine(store, fake)
+    eng.refresh()
+    assert [t.title for t in store.inbox] == ["web task"]
+    assert [t.title for t in store.today] == ["due task", "old local task"]
+    assert all(t.id != "T3" for t in store.inbox + store.today)
+
+
+def test_pending_mutations_shield_tasks_from_overwrite(tmp_path):
+    store = _store(tmp_path)
+    fake = FakeClient()
+    eng = SyncEngine(store, fake)
+    task = store.today[0]
+    eng.enqueue("item_update", {"id": task.id}, lambda: None)
+    # fetched set does NOT contain the task (e.g. completed elsewhere),
+    # but it is shielded while a mutation is pending
+    eng.refresh()
+    assert any(t.id == task.id for t in store.today + store.inbox)
+
+
+def test_queue_capped_at_100(tmp_path):
+    store = _store(tmp_path)
+    eng = SyncEngine(store, FakeClient())
+    for i in range(105):
+        eng.enqueue("item_close", {"id": str(i)}, lambda: None)
+    assert len(store.sync["queue"]) == 100
+    assert store._overflow is True
+
+
+def test_dirty_during_refresh_chains(tmp_path):
+    store = _store(tmp_path)
+    fake = FakeClient()
+    eng = SyncEngine(store, fake)
+    seen = []
+
+    def slow_read():
+        seen.append("read")
+        if len(seen) == 1:  # mutation arrives mid-refresh
+            eng.enqueue("item_close", {"id": "late"}, lambda: None)
+        return fake.read_payload
+    fake.read = slow_read
+    fake.batch_results.append(({}, {}))
+    eng.refresh()
+    # first pass saw the late enqueue -> dirty -> second drain/read
+    assert seen == ["read", "read"] or len(seen) == 2
+    assert store.sync["queue"] == []

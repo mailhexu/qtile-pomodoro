@@ -5,11 +5,17 @@ doc): full-sync reads, batched writes with Command UUID idempotency and
 temp_id create-remapping. No retry logic here — the SyncEngine's
 persistent queue is the retry.
 """
+import datetime
 import json
+import threading
 import urllib.error
 import urllib.parse
+import urllib.request
+import uuid
 from urllib.request import urlopen
 from typing import Any
+
+from qtile_pomodoro.tasks import Task
 
 API_URL = "https://api.todoist.com/api/v1/sync"
 TIMEOUT = 8
@@ -75,3 +81,135 @@ class TodoistClient:
             if result != "ok":
                 raise CommandError(uuid)
         return payload.get("temp_id_mapping") or {}, status
+
+# ---------------------------- sync engine ---------------------------------
+
+QUEUE_CAP = 100
+DROP_AFTER_FAILURES = 3
+
+
+class SyncEngine:
+    """Cache <-> Todoist coherence: queue-as-retry, one worker thread.
+
+    The lock guards in-memory cache/queue mutation and file writes only;
+    it never spans a network call. `refresh()` is the synchronous worker
+    body (testable); the widget layer runs it on a thread and receives
+    completion via qtile.call_soon_threadsafe.
+    """
+
+    def __init__(self, store, client):
+        self.store = store
+        self.client = client
+        self._lock = threading.RLock()
+        self._dirty = False
+        self._id_map: dict[str, str] = {}
+
+    # -- UI thread --------------------------------------------------------
+
+    def enqueue(self, cmd: str, args: dict, local_apply, temp_id: str | None = None):
+        """Apply a mutation locally, queue it for Todoist, persist."""
+        with self._lock:
+            local_apply()
+            if len(self.store.sync["queue"]) >= QUEUE_CAP:
+                self.store._overflow = True  # newest dropped, indicator shows !
+            else:
+                entry = {"cmd": cmd, "uuid": uuid.uuid4().hex, "args": args}
+                if temp_id is not None:
+                    entry["temp_id"] = temp_id
+                self.store.sync["queue"].append(entry)
+            self._dirty = True
+            self.store._save()
+
+    @property
+    def pending_count(self) -> int:
+        with self._lock:
+            return len(self.store.sync["queue"])
+
+    # -- worker -----------------------------------------------------------
+
+    def refresh(self) -> None:
+        """Drain the queue, full-sync read, reconcile. Idempotent."""
+        with self._lock:
+            self._dirty = False
+            batch = list(self.store.sync["queue"])
+        if batch:
+            self._drain(batch)
+        try:
+            data = self.client.read()
+        except TodoistError:
+            return  # cache + queue stay usable; retry next refresh
+        with self._lock:
+            self._reconcile(data)
+            self.store.sync["token"] = data.get("sync_token")
+            self.store.sync["revision"] += 1
+            self.store._save()
+            chained = self._dirty
+        if chained:
+            self.refresh()
+
+    def _drain(self, batch: list[dict]) -> None:
+        try:
+            mapping, _ = self.client.send(batch)
+        except CommandError as exc:
+            with self._lock:
+                kept = []
+                for entry in self.store.sync["queue"]:
+                    if entry.get("uuid") == exc.uuid:
+                        entry["failures"] = entry.get("failures", 0) + 1
+                        if entry["failures"] < DROP_AFTER_FAILURES:
+                            kept.append(entry)  # retry; uuid makes it safe
+                    else:
+                        kept.append(entry)  # server may have applied it;
+                self.store.sync["queue"] = kept  # same-uuid resend is a no-op
+                self.store._save()
+            return
+        except TodoistError:
+            return  # network down: whole batch stays queued
+        with self._lock:
+            self._apply_mapping(mapping)
+            self.store.sync["queue"] = []
+            self.store._save()
+
+    def _apply_mapping(self, mapping: dict[str, str]) -> None:
+        """temp_id -> real id: rewrite task ids and remaining queued args."""
+        if not mapping:
+            return
+        self._id_map.update(mapping)
+        for lst in (self.store.inbox, self.store.today, self.store.completed):
+            for task in lst:
+                if task.id in mapping:
+                    task.id = mapping[task.id]
+                    task.origin = "todoist"
+        for entry in self.store.sync["queue"]:
+            ref = entry["args"].get("id")
+            if ref in mapping:
+                entry["args"]["id"] = mapping[ref]
+
+    def _reconcile(self, data: dict) -> None:
+        """Set-replace todoist-origin tasks; local + pending survive."""
+        store = self.store
+        inbox_id = (data.get("user") or {}).get("inbox_project_id")
+        today = datetime.date.today().isoformat()
+        pending = {e["args"].get("id") for e in store.sync["queue"]}
+        pending |= {e.get("temp_id") for e in store.sync["queue"]}
+        pending.discard(None)
+        new_inbox: list[Task] = []
+        new_today: list[Task] = []
+        for item in data.get("items", []):
+            if item.get("checked") or item.get("is_deleted"):
+                continue  # completed/deleted elsewhere: drop from lists
+            task = Task(id=item["id"], title=item.get("content", ""),
+                        created_at=item.get("added_at") or "",
+                        origin="todoist")
+            due = (item.get("due") or {}).get("date")
+            if inbox_id and item.get("project_id") == inbox_id:
+                new_inbox.append(task)
+            elif due and due <= today:  # overdue included (Today view)
+                new_today.append(task)
+        fetched = {t.id for t in new_inbox + new_today}
+        keep = [t for t in store.inbox + store.today
+                if (t.origin == "local" or t.id in pending)
+                and t.id not in fetched]
+        new_today.extend(keep)
+        store.inbox = new_inbox
+        store.today = new_today
