@@ -6,6 +6,8 @@ Import from config.py::
 """
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any
 
 from libqtile.popup import Popup
@@ -14,6 +16,19 @@ from libqtile.widget import base
 from .tasks import TaskStore
 from .task_model import (HINT_COLOUR, INBOX_COLOUR, OverlayModel, TEXT_COLOUR,
                          TODAY_COLOUR, format_count)
+
+
+def _todoist_token() -> str | None:
+    try:
+        import tomllib
+        path = (Path(os.environ.get("XDG_CONFIG_HOME",
+                                    Path.home() / ".config"))
+                / "qtile-pomodoro" / "config.toml")
+        with open(path, "rb") as fh:
+            return tomllib.load(fh).get("tasks", {}).get("todoist_api_token")
+    except (OSError, ValueError):
+        return None
+
 
 # ------------------------------------------------------------- bar widget
 
@@ -24,6 +39,10 @@ def get_store() -> TaskStore:
     global _STORE
     if _STORE is None:
         _STORE = TaskStore()
+        token = _todoist_token()
+        if token:
+            from .todoist import SyncEngine, TodoistClient
+            _STORE.engine = SyncEngine(_STORE, TodoistClient(token))
     return _STORE
 
 
@@ -39,6 +58,10 @@ class TaskCount(base.InLoopPollText):
 
     def poll(self) -> str:
         store = get_store()
+        if store.engine is not None:
+            # engine keeps this store object authoritative in memory;
+            # file reloads here would race the worker's queue edits
+            return format_count(store.today_count)
         try:
             mtime = store.path.stat().st_mtime
         except OSError:
@@ -97,7 +120,9 @@ class TaskOverlay:
         self.inbox_items = _layout("#ffffff")
         self.input_line = _layout("#ffffff")
         self.hint = _layout("#808080")
+        self._alive = True
         self._draw()
+        self._refresh_async()
 
     @classmethod
     def toggle(cls, qtile: Any) -> None:
@@ -107,17 +132,39 @@ class TaskOverlay:
             cls._current = cls(qtile)
 
     def close(self) -> None:
+        self._alive = False
         type(self)._current = None
         try:
             self.popup.kill()
         except Exception:
             pass
 
+    def _refresh_async(self) -> None:
+        """Kick a background refresh; redraw on completion if still open."""
+        engine = self.store.engine
+        if engine is None:
+            return
+        seen = self.store.sync["revision"]
+
+        def done() -> None:
+            if self._alive and self.store.sync["revision"] != seen:
+                self._draw()
+
+        def run() -> None:
+            engine.refresh()
+            self.qtile.call_soon_threadsafe(done)
+
+        import threading
+        threading.Thread(target=run, daemon=True).start()
+
     def _on_key(self, keysym: int) -> None:
         redraw, close = self.model.key(keysym)
         if close:
             self.close()
-        elif redraw:
+            return
+        if chr(keysym) == "r" and self.model.mode == "nav":
+            self._refresh_async()  # force refresh (FR3)
+        if redraw:
             self._draw()
 
     def _visible_rows(self) -> list[dict[str, Any]]:
@@ -190,6 +237,11 @@ class TaskOverlay:
             if row["kind"] == "header":
                 self.today_header.text = f"Today ({len(self.store.today)})"
                 self.today_header.draw(20, row["y"])
+                pending = len(self.store.sync["queue"])
+                if pending or self.store._overflow:
+                    self.hint.text = ("! " if self.store._overflow
+                                      else f"↻{pending} ")
+                    self.hint.draw(self.WIDTH - 90, row["y"])
             elif row["kind"] == "inbox_header":
                 self.inbox_header.text = f"Inbox ({len(self.store.inbox)})"
                 self.inbox_header.draw(20, row["y"])

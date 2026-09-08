@@ -37,6 +37,7 @@ class TaskStore:
         self.completed: list[Task] = []
         self.sync: dict = {"queue": [], "token": None, "revision": 0}
         self._overflow = False
+        self.engine = None  # SyncEngine when a Todoist token is configured
         self.reload()
 
     def reload(self) -> None:
@@ -75,35 +76,51 @@ class TaskStore:
 
     def add(self, title: str, target: str) -> Task:
         task = Task.new(title)
-        (self.today if target == "today" else self.inbox).append(task)
-        self._save()
+        dest = self.today if target == "today" else self.inbox
+        args = {"content": title}
+        if target == "today":
+            args["due"] = {"string": "today"}
+        if self.engine:
+            self.engine.enqueue("item_add", args,
+                                lambda: dest.append(task), temp_id=task.id)
+        else:
+            dest.append(task)
+            self._save()
         return task
 
     def complete(self, task_id: str) -> None:
-        for i, task in enumerate(self.today):
-            if task.id == task_id:
-                task.completed_at = datetime.now().astimezone().isoformat()
-                self.completed.append(self.today.pop(i))
-                self._save()
-                return
-        for i, task in enumerate(self.inbox):
-            if task.id == task_id:
-                task.completed_at = datetime.now().astimezone().isoformat()
-                self.completed.append(self.inbox.pop(i))
-                self._save()
-                return
+        def _apply() -> None:
+            for source in (self.today, self.inbox):
+                for i, task in enumerate(source):
+                    if task.id == task_id:
+                        task.completed_at = datetime.now().astimezone().isoformat()
+                        self.completed.append(source.pop(i))
+                        return
+        if self.engine:
+            self.engine.enqueue("item_close", {"id": task_id}, _apply)
+        else:
+            _apply()
+            self._save()
 
     def move(self, task_id: str) -> None:
-        for i, task in enumerate(self.today):
-            if task.id == task_id:
-                self.inbox.append(self.today.pop(i))
-                self._save()
-                return
-        for i, task in enumerate(self.inbox):
-            if task.id == task_id:
-                self.today.append(self.inbox.pop(i))
-                self._save()
-                return
+        to_today = any(t.id == task_id for t in self.inbox)
+        def _apply() -> None:
+            if to_today:
+                for i, task in enumerate(self.inbox):
+                    if task.id == task_id:
+                        self.today.append(self.inbox.pop(i))
+                        return
+            else:
+                for i, task in enumerate(self.today):
+                    if task.id == task_id:
+                        self.inbox.append(self.today.pop(i))
+                        return
+        if self.engine:
+            due = {"string": "today"} if to_today else None
+            self.engine.enqueue("item_update", {"id": task_id, "due": due}, _apply)
+        else:
+            _apply()
+            self._save()
 
     @property
     def today_count(self) -> int:
