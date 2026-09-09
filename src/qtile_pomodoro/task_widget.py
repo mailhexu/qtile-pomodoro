@@ -7,9 +7,11 @@ Import from config.py::
 from __future__ import annotations
 
 import os
+import textwrap
 from pathlib import Path
 from typing import Any
 
+from libqtile import pangocffi
 from libqtile.popup import Popup
 from libqtile.widget import base
 
@@ -105,6 +107,8 @@ class TaskOverlay:
     LINE_HEIGHT = 22
     HEADER_Y = 16
     DONE_SHOWN = 5
+    WRAP_COLUMNS = 72
+    MAX_TASK_LINES = 2
     def __init__(self, qtile: Any):
         self.qtile = qtile
         self.store = get_store()
@@ -126,9 +130,11 @@ class TaskOverlay:
         # proven by the Break Overlay; mutating a shared layout per line does
         # not render reliably.
         def _layout(colour: str) -> Any:
-            return self.popup.drawer.textlayout(
+            layout = self.popup.drawer.textlayout(
                 text="", colour=colour, font_family="sans", font_size=16,
                 font_shadow=None, wrap=False, markup=False)
+            layout.layout.set_alignment(pangocffi.ALIGNMENTS["left"])
+            return layout
 
         self.today_header = _layout("#5fafff")
         self.inbox_header = _layout("#d75f5f")
@@ -184,52 +190,103 @@ class TaskOverlay:
         elif redraw:
             self._draw()
 
-    def _visible_rows(self) -> list[dict[str, Any]]:
-        """Single source of geometry for both drawing and click hit-testing.
+    def _wrapped_lines(self, title: str, prefix: str = "") -> list[str]:
+        """Return bounded visual lines which fit the task column."""
+        width = self.WRAP_COLUMNS - len(prefix)
+        lines = textwrap.wrap(
+            title, width=width, break_long_words=True, break_on_hyphens=False,
+        ) or [""]
+        if len(lines) > self.MAX_TASK_LINES:
+            lines = lines[:self.MAX_TASK_LINES]
+            lines[-1] = lines[-1][:width - 1].rstrip() + "…"
+        if prefix:
+            lines[0] = prefix + lines[0]
+        return lines
 
-        The model's selection is clamped to the VISIBLE rows: navigation,
-        completion, and moving can never act on a hidden truncated row.
+    def _visible_rows(self) -> list[dict[str, Any]]:
+        """Single source of geometry for drawing and click hit-testing.
+
+        The model's selection is clamped to visible logical tasks. A task's
+        wrapped visual lines share one row, so selection and clicks cover its
+        entire rendered height.
         """
+        done = [
+            (task, self._wrapped_lines(task.title, "✓ "))
+            for task in list(reversed(self.store.completed))[:self.DONE_SHOWN]
+        ]
+        done_height = self.LINE_HEIGHT + sum(
+            len(lines) * self.LINE_HEIGHT for _, lines in done
+        )
+        if len(self.store.completed) > self.DONE_SHOWN:
+            done_height += self.LINE_HEIGHT
+
+        tasks = [
+            (name, task, self._wrapped_lines(task.title))
+            for name, task in ([("today", task) for task in self.store.today]
+                               + [("inbox", task) for task in self.store.inbox])
+        ]
+        content_bottom = self.HEIGHT - 100
+        task_budget = max(
+            0,
+            content_bottom - self.HEADER_Y - 3 * self.LINE_HEIGHT - done_height,
+        )
+        shown: list[tuple[str, Any, list[str]]] = []
+        used = 0
+        for task_data in tasks:
+            height = len(task_data[2]) * self.LINE_HEIGHT
+            if used + height > task_budget:
+                break
+            shown.append(task_data)
+            used += height
+
+        today_shown = sum(1 for name, _, _ in shown if name == "today")
+        self.model.max_rows = len(shown)
+        self.model.clamp_selection()
+
         rows: list[dict[str, Any]] = []
         y = self.HEADER_Y
         rows.append({"kind": "header", "y": y})
         y += self.LINE_HEIGHT
-        tasks: list[tuple[str, Any]] = \
-            [("today", t) for t in self.store.today] + \
-            [("inbox", t) for t in self.store.inbox]
-        max_rows = (self.HEIGHT - 110 - 2 * self.LINE_HEIGHT
-                    - self.DONE_SHOWN * self.LINE_HEIGHT) // self.LINE_HEIGHT
-        shown = tasks[:max_rows]
-        # keep the Inbox section header visible even when its items are cut
-        today_shown = sum(1 for name, _ in shown if name == "today")
-        inbox_shown = len(shown) - today_shown
-        self.model.max_rows = len(shown)
-        self.model.clamp_selection()
         index = 0
-        for list_name, task in shown[:today_shown]:
-            rows.append({"kind": "task", "task": task, "index": index,
-                         "selected": index == self.model.selection, "y": y})
+        for _, task, lines in shown[:today_shown]:
+            height = len(lines) * self.LINE_HEIGHT
+            rows.append({
+                "kind": "task", "task": task, "index": index,
+                "selected": index == self.model.selection, "y": y,
+                "lines": lines, "height": height,
+            })
             index += 1
-            y += self.LINE_HEIGHT
+            y += height
         rows.append({"kind": "inbox_header", "y": y})
         y += self.LINE_HEIGHT
-        for list_name, task in shown[today_shown:]:
-            rows.append({"kind": "task", "task": task, "index": index,
-                         "selected": index == self.model.selection, "y": y})
+        for _, task, lines in shown[today_shown:]:
+            height = len(lines) * self.LINE_HEIGHT
+            rows.append({
+                "kind": "task", "task": task, "index": index,
+                "selected": index == self.model.selection, "y": y,
+                "lines": lines, "height": height,
+            })
             index += 1
+            y += height
+        if len(tasks) > len(shown):
+            rows.append({"kind": "more", "count": len(tasks) - len(shown), "y": y})
             y += self.LINE_HEIGHT
-        if len(tasks) > max_rows:
-            rows.append({"kind": "more", "count": len(tasks) - max_rows, "y": y})
-            y += self.LINE_HEIGHT
-        done = list(reversed(self.store.completed))[:self.DONE_SHOWN]
-        rows.append({"kind": "done_header", "count": len(self.store.completed), "y": y})
+        rows.append({
+            "kind": "done_header", "count": len(self.store.completed), "y": y,
+        })
         y += self.LINE_HEIGHT
-        for task in done:
-            rows.append({"kind": "done", "task": task, "y": y})
-            y += self.LINE_HEIGHT
+        for task, lines in done:
+            height = len(lines) * self.LINE_HEIGHT
+            rows.append({
+                "kind": "done", "task": task, "y": y,
+                "lines": lines, "height": height,
+            })
+            y += height
         if len(self.store.completed) > self.DONE_SHOWN:
-            rows.append({"kind": "done_more",
-                         "count": len(self.store.completed) - self.DONE_SHOWN, "y": y})
+            rows.append({
+                "kind": "done_more",
+                "count": len(self.store.completed) - self.DONE_SHOWN, "y": y,
+            })
         return rows
 
     def _on_click(self, x: int, y: int, button: int) -> None:
@@ -238,7 +295,7 @@ class TaskOverlay:
         for row in self._visible_rows():
             if row["kind"] != "task":
                 continue
-            if row["y"] <= y < row["y"] + self.LINE_HEIGHT:
+            if row["y"] <= y < row["y"] + row["height"]:
                 self.store.complete(row["task"].id)
                 self._draw()
                 return
@@ -250,6 +307,7 @@ class TaskOverlay:
         inbox_titles: list[str] = []
         done_titles: list[str] = []
         selected_y: int | None = None
+        selected_height = 0
         for row in self._visible_rows():
             if row["kind"] == "header":
                 self.today_header.text = f"Today ({len(self.store.today)})"
@@ -269,21 +327,22 @@ class TaskOverlay:
                 self.done_header.text = f"Done ({row['count']})"
                 self.done_header.draw(20, row["y"])
             elif row["kind"] == "done":
-                done_titles.append(f"  ✓ {row['task'].title}")
+                done_titles.extend(row["lines"])
             elif row["kind"] == "done_more":
                 self.hint.text = f"… {row['count']} more done"
                 self.hint.draw(20, row["y"])
             else:
                 (today_titles if row["task"] in self.store.today else inbox_titles)\
-                    .append(f"  {row['task'].title}")
+                    .extend(row["lines"])
                 if row["selected"]:
                     selected_y = row["y"]
+                    selected_height = row["height"]
 
         # selection highlight bar behind the selected row, drawn first
         if selected_y is not None:
             ctx = popup.drawer.ctx
             ctx.set_source_rgb(0.16, 0.24, 0.40)
-            ctx.rectangle(8, selected_y - 3, self.WIDTH - 16, self.LINE_HEIGHT)
+            ctx.rectangle(8, selected_y - 3, self.WIDTH - 16, selected_height)
             ctx.fill()
 
         for block, titles in ((self.today_items, today_titles),
