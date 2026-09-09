@@ -182,6 +182,7 @@ class TaskOverlay:
         # range-checks (media keysyms exceed chr()'s domain)
         if (keysym_to_char(keysym) == "r" and self.model.mode == "nav"
                 and not self.model.input):
+            self.model.undo_status = ""  # r bypasses model.key()
             self._refresh_async()
             return
         redraw, close = self.model.key(keysym)

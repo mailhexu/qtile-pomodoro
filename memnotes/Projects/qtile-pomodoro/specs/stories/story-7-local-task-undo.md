@@ -1,5 +1,5 @@
 ---
-status: review
+status: done
 created: 2026-09-09
 updated: 2026-09-09
 linked_prd: ../prd-task-undo.md
@@ -9,7 +9,7 @@ related_notes:
   - ../../notes/using-the-task-overlay.md
 consumer_interface_change: true
 review_base: a00a406447ac67956ab416587c666149cf893d51
-review_round: 2
+review_round: 3
 evidence_packs: []
 ---
 
@@ -78,7 +78,7 @@ or move with one key (`u`), so that I never lose a task to a mis-press.
 ## Code Review
 
 **Review Base**: `a00a406447ac67956ab416587c666149cf893d51`
-**Current Round**: 2
+**Current Round**: 3
 
 ### Standards
 
@@ -103,9 +103,16 @@ or move with one key (`u`), so that I never lose a task to a mis-press.
 | SPEC-004 | Non-blocking | PRD Should 2: selection jumped to the restored task. | Reselect the previously selected task when still visible, else clamp. | Round 1 | resolved |
 | SPEC-005 | Non-blocking | Reserved-prefix guidance missed `u`. | Same fix as STD-008. | Round 1 | resolved |
 
+### Regressions
+
+| ID | Disposition | Evidence | Required Resolution | Introduced | Status |
+|----|-------------|----------|---------------------|------------|--------|
+| REG-001 | Blocking (non-blocking parent SPEC-003) | The status clear lived only in `OverlayModel.key()`; the overlay's nav-mode `r` dispatch bypasses it, leaving stale undo feedback. | Clear `undo_status` in the `r` branch of `TaskOverlay._on_key`. | Round 2 | resolved |
+
 ### Re-review History
 
 | Round | Reviewed Revision | Findings Checked | New REG/LATE Evidence | Decision |
 |-------|-------------------|------------------|-----------------------|----------|
 | 1 | `c296e16` | complete two-axis inventory | n/a | changes requested |
-| 2 | fixes after `c296e16` | STD-001..008, SPEC-001..005 | pending verification round | pending |
+| 2 | `d026afa` | STD-001..008, SPEC-001..005 | REG-001 (r bypassed status clear) | changes requested (REG-001) |
+| 3 | post-`d026afa` fixes | REG-001 | none | approved |

@@ -1,5 +1,5 @@
 ---
-status: approved
+status: done
 created: 2026-09-09
 updated: 2026-09-09
 linked_prd: ../prd-task-undo.md
@@ -33,11 +33,11 @@ move from the Qtile Task Overlay.
 
 | Story | Title | Status |
 |-------|-------|--------|
-| [Story 7](../stories/story-7-local-task-undo.md) | One-step local task undo | in review |
+| [Story 7](../stories/story-7-local-task-undo.md) | One-step local task undo | done |
 
 ## Success Criteria
 
-- [ ] The latest local completion and move are reversible exactly once.
-- [ ] Sync-enabled `u` is safe and clearly identified as unavailable.
-- [ ] Store/model tests and a live local Qtile smoke pass.
-- [ ] Consumer guidance and code review are complete.
+- [x] The latest local completion and move are reversible exactly once.
+- [x] Sync-enabled `u` is safe and clearly identified as unavailable.
+- [x] Store/model tests and a live local Qtile smoke pass.
+- [x] Consumer guidance and code review are complete.
