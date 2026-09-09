@@ -329,7 +329,7 @@ class TaskOverlay:
             if row["kind"] != "task":
                 continue
             if row["y"] <= y < row["y"] + row["height"]:
-                self.store.complete(row["task"].id)
+                self.model.apply_complete(row["task"].id)
                 self._draw()
                 return
 
@@ -402,8 +402,9 @@ class TaskOverlay:
             prefix = "[NAV] "
         self.input_line.text = f"{prefix}{self.model.input}_"
         self.input_line.draw(20, self.HEIGHT - 56)
+        undo = "u:undo(local)" if self.store.engine else "u:undo"
         self.hint.text = ("type to add  Tab:target  j/k:select  d:done  "
-                          "m:move  r:refresh  Esc:close/back")
+                          f"m:move  {undo}  r:refresh  Esc:close/back")
         self.hint.draw(20, self.HEIGHT - 32)
 
         popup.draw()

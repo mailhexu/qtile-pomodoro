@@ -16,7 +16,7 @@ TEXT_COLOUR = (1.0, 1.0, 1.0)
 HINT_COLOUR = (0.5, 0.5, 0.5)
 
 
-NAV_KEYS = {"j", "k", "m", "d", "i", " "}
+NAV_KEYS = {"j", "k", "m", "d", "i", "u", " "}
 
 def format_count(count: int) -> str:
     return f"Tasks:{count}"
@@ -38,6 +38,7 @@ class OverlayModel:
         self.target = "today"
         self.selection = 0
         self.max_rows = max_rows  # set by the overlay to the visible row count
+        self._undo_action = None  # latest local mutation (Story 7)
 
     def _rows(self) -> list[tuple[str, Any]]:
         return [("today", t) for t in self.store.today] + \
@@ -48,6 +49,21 @@ class OverlayModel:
         if self.max_rows is not None:
             limit = min(limit, self.max_rows)
         self.selection = max(0, min(self.selection, max(0, limit - 1)))
+
+    def apply_complete(self, task_id: str) -> None:
+        """Complete by id from any caller (keyboard or mouse); records undo."""
+        self._undo_action = self.store.complete(task_id)
+
+    def apply_move(self, task_id: str) -> None:
+        """Move by id from any caller; records undo."""
+        self._undo_action = self.store.move(task_id)
+
+    def apply_undo(self) -> None:
+        """Reverse the latest local action; safe no-op when none retained."""
+        if self._undo_action is None:
+            return
+        if self.store.undo(self._undo_action):
+            self._undo_action = None
 
     def key(self, keysym: int) -> tuple[bool, bool]:
         """Feed one keysym. Returns (redraw, close)."""
@@ -79,6 +95,9 @@ class OverlayModel:
         char = keysym_to_char(keysym)
         rows = self._rows()
         if not rows:
+            if char == "u":  # undo must work with every task completed
+                self.apply_undo()
+                return True, False
             if char is not None and char not in NAV_KEYS:
                 self.mode, self.input = "input", char
                 return True, False
@@ -97,9 +116,11 @@ class OverlayModel:
         elif char == "k":
             self.selection -= 1
         elif char == "d":
-            self.store.complete(task.id)
+            self.apply_complete(task.id)
         elif char == "m":
-            self.store.move(task.id)
+            self.apply_move(task.id)
+        elif char == "u":
+            self.apply_undo()
         else:
             return False, False
         self.clamp_selection()

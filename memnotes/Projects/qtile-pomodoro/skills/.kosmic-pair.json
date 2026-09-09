@@ -8,7 +8,7 @@
   "project_id": "qtile-pomodoro",
   "usage": {
     "name": "qtile-pomodoro-usage",
-    "sha256": "c15fc1245fd9c273dbae76b3bdcdd840a0fdfca503af56cb6222dbc94ac467a1"
+    "sha256": "8fd60a5b736f036960b8dc2987cde4656b23d08cb2631166dc6f2c30cf8e3da5"
   },
   "working_state": "working-tree"
 }

@@ -18,6 +18,9 @@ and updates within a second of any change.
 - **Complete**: `d` on the selected row, or click the row. Completed tasks are
   hidden but retained in `~/.local/share/qtile-pomodoro/tasks.json`.
 - **Move**: `m` swaps the selected task between Today and Inbox.
+- **Undo**: `u` reverses the latest local completion or move, exactly once.
+  It is local-only: while Todoist sync is enabled the hint shows
+  `u:undo(local)` and `u` does nothing.
 - **Done**: a dimmed `Done (N)` section lists the 5 most recent
   completions (display only).
 - **Close**: `Esc` (backs out of typing first) or `Mod+N` again.

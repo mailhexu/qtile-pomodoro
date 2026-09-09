@@ -29,6 +29,13 @@ class Task:
 
 
 @dataclass
+class UndoAction:
+    """One reversible local mutation; never persisted (Story 7)."""
+    kind: str    # "complete" | "move"
+    task_id: str
+    source: str  # list name before the mutation: "today" | "inbox"
+
+@dataclass
 class TaskStore:
     path: Path = field(default_factory=tasks_path)
     def __post_init__(self) -> None:
@@ -88,39 +95,64 @@ class TaskStore:
             self._save()
         return task
 
-    def complete(self, task_id: str) -> None:
+    def complete(self, task_id: str) -> UndoAction | None:
+        action: UndoAction | None = None
         def _apply() -> None:
-            for source in (self.today, self.inbox):
+            nonlocal action
+            for name in ("today", "inbox"):
+                source = getattr(self, name)
                 for i, task in enumerate(source):
                     if task.id == task_id:
                         task.completed_at = datetime.now().astimezone().isoformat()
                         self.completed.append(source.pop(i))
+                        action = UndoAction("complete", task_id, name)
                         return
         if self.engine:
             self.engine.enqueue("item_close", {"id": task_id}, _apply)
-        else:
-            _apply()
-            self._save()
+            return None  # sync path: cloud undo out of scope (ADR-009)
+        _apply()
+        self._save()
+        return action
 
-    def move(self, task_id: str) -> None:
+    def move(self, task_id: str) -> UndoAction | None:
         to_today = any(t.id == task_id for t in self.inbox)
+        action: UndoAction | None = None
+        source, dest = ("inbox", "today") if to_today else ("today", "inbox")
         def _apply() -> None:
-            if to_today:
-                for i, task in enumerate(self.inbox):
-                    if task.id == task_id:
-                        self.today.append(self.inbox.pop(i))
-                        return
-            else:
-                for i, task in enumerate(self.today):
-                    if task.id == task_id:
-                        self.inbox.append(self.today.pop(i))
-                        return
+            nonlocal action
+            src = getattr(self, source)
+            for i, task in enumerate(src):
+                if task.id == task_id:
+                    getattr(self, dest).append(src.pop(i))
+                    action = UndoAction("move", task_id, source)
+                    return
         if self.engine:
             due = {"string": "today"} if to_today else None
             self.engine.enqueue("item_update", {"id": task_id, "due": due}, _apply)
-        else:
-            _apply()
-            self._save()
+            return None
+        _apply()
+        self._save()
+        return action
+
+    def undo(self, action: UndoAction) -> bool:
+        """Reverse one local mutation; False when the state moved on."""
+        if action.kind == "complete":
+            for i, task in enumerate(self.completed):
+                if task.id == action.task_id:
+                    task.completed_at = None
+                    getattr(self, action.source).append(self.completed.pop(i))
+                    self._save()
+                    return True
+            return False
+        for name in ("today", "inbox"):
+            lst = getattr(self, name)
+            for i, task in enumerate(lst):
+                if task.id == action.task_id:
+                    if name != action.source:
+                        getattr(self, action.source).append(lst.pop(i))
+                        self._save()
+                    return True
+        return False
 
     @property
     def today_count(self) -> int:
