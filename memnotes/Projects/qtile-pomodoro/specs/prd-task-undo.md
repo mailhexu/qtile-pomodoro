@@ -62,4 +62,5 @@ A Qtile task-overlay user who accidentally marks a task done or moves it to the 
 
 ## Open Questions
 
-- None. The proposal uses `u` as the navigation-mode command because it is unclaimed by the current overlay keymap.
+- What is the required Todoist behavior? Completion and moves are currently write-through. A local-only undo can be overwritten by the next sync; a cloud-consistent undo needs a researched compensating Todoist command.
+- The proposal uses `u` as the navigation-mode command because it is unclaimed by the current overlay keymap.
