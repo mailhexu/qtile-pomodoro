@@ -7,7 +7,6 @@ Import from config.py::
 from __future__ import annotations
 
 import os
-import textwrap
 from pathlib import Path
 from typing import Any
 
@@ -107,7 +106,7 @@ class TaskOverlay:
     LINE_HEIGHT = 22
     HEADER_Y = 16
     DONE_SHOWN = 5
-    WRAP_COLUMNS = 72
+    TASK_TEXT_WIDTH = WIDTH - 40
     MAX_TASK_LINES = 2
     def __init__(self, qtile: Any):
         self.qtile = qtile
@@ -142,6 +141,7 @@ class TaskOverlay:
         self.done_items = _layout("#808080")
         self.today_items = _layout("#ffffff")
         self.inbox_items = _layout("#ffffff")
+        self._measure_items = _layout("#ffffff")
         self.input_line = _layout("#ffffff")
         self.hint = _layout("#808080")
         self._alive = True
@@ -190,17 +190,50 @@ class TaskOverlay:
         elif redraw:
             self._draw()
 
+    def _text_width(self, text: str) -> int:
+        self._measure_items.text = text
+        return self._measure_items.width
+
+    def _fitting_prefix(self, text: str, prefix: str = "", suffix: str = "") -> int:
+        """Return the longest non-empty prefix fitting the task column."""
+        low, high = 1, len(text)
+        while low <= high:
+            middle = (low + high) // 2
+            if self._text_width(prefix + text[:middle] + suffix) <= self.TASK_TEXT_WIDTH:
+                low = middle + 1
+            else:
+                high = middle - 1
+        return max(1, high)
+
+    def _ellipsis(self, line: str) -> str:
+        if self._text_width(line + "…") <= self.TASK_TEXT_WIDTH:
+            return line + "…"
+        end = self._fitting_prefix(line, suffix="…")
+        return line[:end].rstrip() + "…"
+
     def _wrapped_lines(self, title: str, prefix: str = "") -> list[str]:
-        """Return bounded visual lines which fit the task column."""
-        width = self.WRAP_COLUMNS - len(prefix)
-        lines = textwrap.wrap(
-            title, width=width, break_long_words=True, break_on_hyphens=False,
-        ) or [""]
+        """Return at most two Pango-width-bounded visual lines."""
+        lines: list[str] = []
+        line = prefix
+        for word in title.split() or [""]:
+            separator = "" if line in ("", prefix) else " "
+            candidate = f"{line}{separator}{word}"
+            if self._text_width(candidate) <= self.TASK_TEXT_WIDTH:
+                line = candidate
+                continue
+            if line != prefix:
+                lines.append(line)
+                line = ""
+            while self._text_width(line + word) > self.TASK_TEXT_WIDTH:
+                end = self._fitting_prefix(word, prefix=line)
+                lines.append(line + word[:end])
+                word = word[end:]
+                line = ""
+            line += word
+        lines.append(line)
         if len(lines) > self.MAX_TASK_LINES:
             lines = lines[:self.MAX_TASK_LINES]
-            lines[-1] = lines[-1][:width - 1].rstrip() + "…"
-        if prefix:
-            lines[0] = prefix + lines[0]
+            lines[-1] = self._ellipsis(lines[-1])
         return lines
 
     def _visible_rows(self) -> list[dict[str, Any]]:
