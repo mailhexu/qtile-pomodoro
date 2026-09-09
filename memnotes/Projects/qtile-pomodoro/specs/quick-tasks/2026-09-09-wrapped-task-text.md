@@ -1,5 +1,5 @@
 ---
-status: in_progress
+status: done
 created: 2026-09-09
 updated: 2026-09-09
 related_notes:
@@ -10,7 +10,7 @@ related_files:
   - ../../../../../src/qtile_pomodoro/task_widget.py
 consumer_interface_change: true
 review_base: 32e6870c367d54186a1c29a61beb9920a80c7334
-review_round: 1
+review_round: 2
 evidence_packs: []
 ---
 
@@ -37,7 +37,7 @@ long titles must wrap rather than run past the available column.
 ## Acceptance Criteria
 
 - [x] Every active title and its continuation begins at the same left edge.
-- [ ] A long title wraps to at most two lines inside the task column.
+- [x] A long title wraps to at most two lines inside the task column.
 - [x] Selection and clicking use every wrapped line of one logical task.
 - [x] Done rows remain dimmed, display-only, and do not overlap active content.
 - [x] Unit tests and live verification pass.
@@ -70,7 +70,7 @@ height for rendering, selection, and hit testing.
 ## Code Review
 
 **Review Base**: `32e6870c367d54186a1c29a61beb9920a80c7334`
-**Current Round**: 1
+**Current Round**: 2
 
 ### Standards
 
@@ -82,16 +82,17 @@ height for rendering, selection, and hit testing.
 
 | ID | Disposition | Evidence | Required Resolution | Introduced | Status |
 |----|-------------|----------|---------------------|------------|--------|
-| SPEC-001 | Blocking | Character-count wrapping does not guarantee a proportional Pango line fits the task column. | Measure rendered Pango width for wrapping and ellipsis. | Round 1 | open |
+| SPEC-001 | Blocking | Character-count wrapping does not guarantee a proportional Pango line fits the task column. | Measure rendered Pango width for wrapping and ellipsis. | Round 1 | resolved |
 
 ### Re-review History
 
 | Round | Reviewed Revision | Findings Checked | New REG/LATE Evidence | Decision |
 |-------|-------------------|------------------|-----------------------|----------|
 | 1 | `43d1f7f` | Complete two-axis inventory | n/a | changes requested |
+| 2 | `d10f86c` | STD-001 and SPEC-001 | none | approved |
 
 ## Review
 
 - [x] Diff reviewed against scope.
-- [ ] Acceptance criteria satisfied.
-- [ ] Status set to `done` only after verification and review pass.
+- [x] Acceptance criteria satisfied.
+- [x] Status set to `done` after verification and review pass.
