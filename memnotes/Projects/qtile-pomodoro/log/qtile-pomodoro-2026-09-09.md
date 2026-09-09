@@ -4,3 +4,5 @@
 - Round-1 two-axis review found and resolved STD-001 (restore the Quick Task template) and SPEC-001 (measure Pango width rather than characters); Round 2 approved d10f86c with no regressions.
 - Drafted [Undo Task Completion and Move PRD](../specs/prd-task-undo.md); it awaits the required product approval before architecture or implementation.
 - PRD approved with local-only undo semantics; drafted [Local Task Undo architecture](../specs/architecture-task-undo.md), awaiting the required architecture approval.
+- Local Task Undo architecture approved; preparing the single Epic for approval.
+- Drafted [Epic 3: Local Task Undo](../specs/epics/epic-3-local-task-undo.md), awaiting the required epic approval.
