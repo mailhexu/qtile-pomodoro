@@ -6,3 +6,4 @@
 - PRD approved with local-only undo semantics; drafted [Local Task Undo architecture](../specs/architecture-task-undo.md), awaiting the required architecture approval.
 - Local Task Undo architecture approved; preparing the single Epic for approval.
 - Drafted [Epic 3: Local Task Undo](../specs/epics/epic-3-local-task-undo.md), awaiting the required epic approval.
+- Epic 3 approved; drafted [Story 7: One-step local task undo](../specs/stories/story-7-local-task-undo.md), awaiting story approval.
