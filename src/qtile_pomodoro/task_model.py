@@ -39,6 +39,7 @@ class OverlayModel:
         self.selection = 0
         self.max_rows = max_rows  # set by the overlay to the visible row count
         self._undo_action = None  # latest local mutation (Story 7)
+        self.undo_status = ""     # brief feedback for the overlay hint
 
     def _rows(self) -> list[tuple[str, Any]]:
         return [("today", t) for t in self.store.today] + \
@@ -57,16 +58,33 @@ class OverlayModel:
     def apply_move(self, task_id: str) -> None:
         """Move by id from any caller; records undo."""
         self._undo_action = self.store.move(task_id)
-
     def apply_undo(self) -> None:
         """Reverse the latest local action; safe no-op when none retained."""
-        if self._undo_action is None:
+        if self.store.engine is not None:
+            self._undo_action = None  # sync became active: drop local undo
+            self.undo_status = "undo off (sync)"
             return
+        if self._undo_action is None:
+            self.undo_status = "nothing to undo"
+            return
+        rows = self._rows()
+        selected_id = rows[self.selection][1].id if rows else None
         if self.store.undo(self._undo_action):
             self._undo_action = None
+            self.undo_status = "undone"
+        else:
+            self._undo_action = None  # stale: state moved on
+            self.undo_status = "nothing to undo"
+        if selected_id is not None:
+            for i, (_, task) in enumerate(self._rows()):
+                if task.id == selected_id:
+                    self.selection = i
+                    break
+            self.clamp_selection()
 
     def key(self, keysym: int) -> tuple[bool, bool]:
         """Feed one keysym. Returns (redraw, close)."""
+        self.undo_status = ""  # status shows only until the next key
         if keysym == KEY_TAB:
             self.target = "inbox" if self.target == "today" else "today"
             return True, False

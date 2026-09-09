@@ -403,8 +403,9 @@ class TaskOverlay:
         self.input_line.text = f"{prefix}{self.model.input}_"
         self.input_line.draw(20, self.HEIGHT - 56)
         undo = "u:undo(local)" if self.store.engine else "u:undo"
+        status = f"  [{self.model.undo_status}]" if self.model.undo_status else ""
         self.hint.text = ("type to add  Tab:target  j/k:select  d:done  "
-                          f"m:move  {undo}  r:refresh  Esc:close/back")
+                          f"m:move  {undo}  r:refresh  Esc:close/back{status}")
         self.hint.draw(20, self.HEIGHT - 32)
 
         popup.draw()

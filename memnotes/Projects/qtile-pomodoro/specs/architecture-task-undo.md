@@ -4,7 +4,7 @@ created: 2026-09-09
 updated: 2026-09-09
 linked_prd: prd-task-undo.md
 linked_research: []
-linked_stories: []
+linked_stories: [../stories/story-7-local-task-undo.md]
 ---
 
 # Architecture: Local Task Undo

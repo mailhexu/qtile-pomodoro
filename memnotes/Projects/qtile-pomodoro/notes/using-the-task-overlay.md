@@ -26,5 +26,5 @@ and updates within a second of any change.
 - **Close**: `Esc` (backs out of typing first) or `Mod+N` again.
 
 Space is deliberately not a completion key — single-key completion caused
-accidental task removal. Titles beginning with `j/k/m/d/i` need `i` or
+accidental task removal. Titles beginning with `j/k/m/d/i/u` need `i` or
 `Enter` first to enter typing mode. Tasks persist across Qtile restarts.

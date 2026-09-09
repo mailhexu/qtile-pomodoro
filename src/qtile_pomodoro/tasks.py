@@ -148,9 +148,10 @@ class TaskStore:
             lst = getattr(self, name)
             for i, task in enumerate(lst):
                 if task.id == action.task_id:
-                    if name != action.source:
-                        getattr(self, action.source).append(lst.pop(i))
-                        self._save()
+                    if name == action.source:
+                        return False  # already home: action is stale
+                    getattr(self, action.source).append(lst.pop(i))
+                    self._save()
                     return True
         return False
 

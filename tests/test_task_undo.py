@@ -149,3 +149,44 @@ def test_click_completion_records_undo(model) -> None:
     assert [t.title for t in model.store.completed] == ["alpha"]
     _, _ = model.key(ord("u"))
     assert [t.title for t in model.store.today] == ["alpha"]
+
+def test_undo_rejected_when_sync_becomes_active(model) -> None:
+    _, _ = model.key(ord("d"))       # local completion records undo
+    model.store.engine = _LocalApplyEngine()  # sync enabled afterwards
+    _, _ = model.key(ord("u"))
+    assert [t.title for t in model.store.completed] == ["alpha"]  # untouched
+    assert model._undo_action is None  # dropped, not executed
+
+
+def test_stale_move_undo_returns_failure(store: TaskStore) -> None:
+    task_id = store.add("shuttle", "inbox").id
+    action = store.move(task_id)      # inbox -> today
+    assert action is not None
+    assert store.move(task_id) is not None  # moved back: action now stale
+    assert store.undo(action) is False
+
+
+def test_undo_preserves_selected_task(model) -> None:
+    _, _ = model.key(ord("j"))       # select 'beta' (inbox)
+    _, _ = model.key(ord("d"))       # complete 'beta'
+    _, _ = model.key(ord("k"))       # selection clamps onto 'alpha'
+    _, _ = model.key(ord("u"))       # restore 'beta'
+    assert [t.title for t in model.store.inbox] == ["beta"]
+    # 'alpha' (still visible, was selected) keeps the highlight
+    assert model._rows()[model.selection][1].title == "alpha"
+
+
+def test_undo_reports_status(model) -> None:
+    _, _ = model.key(ord("d"))
+    _, _ = model.key(ord("u"))
+    assert model.undo_status == "undone"
+    _, _ = model.key(ord("j"))
+    assert model.undo_status == ""  # cleared on the next key
+    _, _ = model.key(ord("u"))
+    assert model.undo_status == "nothing to undo"
+
+
+def test_undo_off_status_with_sync(model) -> None:
+    model.store.engine = _LocalApplyEngine()
+    _, _ = model.key(ord("u"))
+    assert model.undo_status == "undo off (sync)"
