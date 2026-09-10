@@ -10,3 +10,4 @@
 - Story 7 approved and implemented (TDD): store UndoAction/undo(), model u key with unified click/d completion, hint feedback, selection preservation, sync-off guard. 60/60 tests; live Qtile smoke d/u and m/u net-zero with sync restored.
 - Story 7 round-1 review: 13 findings (STD-001..008, SPEC-001..005) all resolved; round 2 verification pending.
 - Round 2 verified STD-001..008 and SPEC-001..005 resolved; found REG-001 (r refresh bypassed the undo-status clear) — fixed and approved in Round 3. Story 7 and Epic 3 done; deployed to Qtile.
+- Deployed temporary queryable BreakOverlays diagnostics for the group-2 hidden-overlay report. The current snapshot is read over Qtile IPC; awaiting a user-captured failing transition.

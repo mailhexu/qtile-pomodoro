@@ -9,7 +9,6 @@ from typing import Any
 from libqtile.popup import Popup
 from libqtile.widget import base
 
-
 def _command(command: str) -> list[str]:
     return [sys.executable, "-m", "qtile_pomodoro.cli", command]
 
@@ -29,14 +28,31 @@ class BreakOverlays:
         self.qtile = qtile
         self.popups: list[Popup] = []
 
+    def _record_debug(self, state: dict[str, Any], command: str | None) -> None:
+        focus = self.qtile.core.conn.conn.core.GetInputFocus().reply().focus
+        self.qtile.pomodoro_overlay_debug = {
+            "command": command, "phase": state["phase"],
+            "status": state["status"], "overlay": state.get("overlay"),
+            "group": self.qtile.current_screen.group.name, "focus": focus,
+            "popups": [
+                (popup.win.wid, popup.win.hidden, popup.x, popup.y,
+                 popup.width, popup.height)
+                for popup in self.popups
+            ],
+        }
+
     def sync(self, state: dict[str, Any]) -> None:
-        command = "skip" if state.get("overlay") else "start" if state["status"] == "resume" else None
+        command = ("skip" if state.get("overlay") else
+                   "start" if state["status"] == "resume" else None)
         if command is None:
             for popup in self.popups: popup.hide()
+            self._record_debug(state, command)
             return
         seconds = state["remaining"]
-        text = f"BREAK\n{seconds // 60:02d}:{seconds % 60:02d}" if command == "skip" else "BREAK COMPLETE"
-        button_text = "Click here to skip break" if command == "skip" else "Click here to start work · or press Space"
+        text = (f"BREAK\n{seconds // 60:02d}:{seconds % 60:02d}"
+                if command == "skip" else "BREAK COMPLETE")
+        button_text = ("Click here to skip break" if command == "skip"
+                       else "Click here to start work · or press Space")
         while len(self.popups) < len(self.qtile.screens):
             screen = self.qtile.screens[len(self.popups)]
             popup = Popup(
@@ -82,6 +98,7 @@ class BreakOverlays:
             popup.place()
             popup.unhide()
             popup.win.focus()
+        self._record_debug(state, command)
 
     def activate(self, x: int, y: int, button: int, height: int, command: str) -> None:
         if button == 1 and y >= height * 2 // 3:
