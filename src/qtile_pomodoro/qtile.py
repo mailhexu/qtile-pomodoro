@@ -16,7 +16,7 @@ def _command(command: str) -> list[str]:
 
 def _status() -> dict[str, Any] | None:
     try:
-        output = subprocess.check_output(_command("status") + ["--json"], text=True, timeout=0.5)
+        output = subprocess.check_output(_command("status") + ["--json"], text=True, timeout=2.0)
         return json.loads(output)
     except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
         return None

@@ -166,7 +166,11 @@ class Timer:
 
     def status(self) -> dict[str, Any]:
         if self.state.status == "running" and self.state.end_at:
-            self.state.remaining = max(0, round(self.state.end_at - time.time()))
+            now = time.time()
+            if now >= self.state.end_at:
+                self.finish()
+            else:
+                self.state.remaining = round(self.state.end_at - now)
         result = asdict(self.state)
         result["long_break_after"] = self.config["long_break_after"]
         result["overlay"] = self.state.status == "running" and self.state.phase != "focus"
