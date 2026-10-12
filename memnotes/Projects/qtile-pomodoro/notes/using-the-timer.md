@@ -12,4 +12,12 @@ Install the package into the Python environment that runs Qtile. Configure inter
 
 The Qtile bar shows the active phase, remaining time, and progress toward a Long Break. `Mod+p` starts or resumes focus, `Mod+Shift+p` pauses, `Mod+Ctrl+p` resets, and `Mod+Alt+p` opens the text statistics report.
 
-A completed Focus Session opens an all-screen X11 Break Overlay. Its bottom control skips the Break; a completed Break presents a Resume Gate that accepts Space.
+A completed Focus Session opens an all-screen X11 Break Overlay that stays
+above application windows when switching workspaces. Its bottom control skips
+the Break; a completed Break presents a Resume Gate that accepts Space.
+
+After upgrading the package, replace both the surviving Timer Service process
+and Qtile's cached modules. Restarting Qtile alone does not update the daemon.
+Preserve the saved timer state: do not use `reset` or `start` as upgrade steps.
+An overdue focus recovers into one fresh break; a focus that has not expired
+keeps its original deadline. See [Qtile integration](qtile-integration.md).

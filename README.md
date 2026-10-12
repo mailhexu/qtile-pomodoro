@@ -30,18 +30,52 @@ long_break_after = 4
 
 State and completed-session history live in `$XDG_DATA_HOME/qtile-pomodoro/timer.sqlite3`. The configuration reload command changes only future phases.
 
+### Upgrading without losing an active timer
+
+An install replaces files, not code already loaded in memory. Upgrade into
+Qtile's interpreter, then replace **both** the Qtile module cache and the
+long-lived Timer Service process. A config reload does not clear Qtile's
+module cache, and restarting Qtile alone does not replace a surviving daemon.
+
+1. Record `/path/to/qtile/bin/python -m qtile_pomodoro.cli status --json`
+   and `/path/to/qtile/bin/python -m qtile_pomodoro.cli stats`, using the
+   interpreter into which the package was installed. Identify
+   the sole listening owner of `$XDG_RUNTIME_DIR/qtile-pomodoro-<uid>.sock`
+   (`/tmp` if `XDG_RUNTIME_DIR` is unset) with `ss -xlpn`, and inspect that
+   exact PID with `ps -p PID -o pid,lstart,args`. Stop if ownership is ambiguous.
+2. Install with the interpreter above and restart Qtile with
+   `qtile cmd-obj -o cmd -f restart`; do not substitute a config reload.
+3. Recheck the socket owner and process identity. If the known old daemon
+   still owns it, terminate **only that verified PID** with `kill -TERM PID`.
+   The widget's next poll normally starts the replacement with Qtile's
+   interpreter. Check for a new sole socket owner and a working status
+   response; do not launch another daemon alongside it. If automatic launch
+   is deliberately disabled, wait for the old process to exit and confirm
+   there is no listener before starting one daemon using
+   `/path/to/qtile/bin/python -m qtile_pomodoro.cli daemon`.
+4. Check status/history again. Before expiry, the original deadline, cycle
+   counter and history are preserved. If focus is already overdue, recovery
+   records exactly one completion and starts a fresh break at recovery time;
+   it does not begin a fresh focus or catch up through multiple phases.
+
+Do **not** issue `reset` or `start`, delete the store, or rewrite history as
+part of an upgrade. See [development deployment notes](docs/DEVELOPMENT.md)
+for the stale-runtime incident and restart details.
+
 ## Qtile integration
 
 Add this to `config.py`:
 
 ```python
 import subprocess
+import sys
 from libqtile import hook, widget
+from qtile_pomodoro.qtile import Pomodoro
 from qtile_pomodoro.task_widget import TaskCount, TaskOverlay
 
 @hook.subscribe.startup_once
 def start_pomodoro():
-    subprocess.Popen(["qtile-pomodoro", "daemon"])
+    subprocess.Popen([sys.executable, "-m", "qtile_pomodoro.cli", "daemon"])
 
 # Add Pomodoro() and TaskCount() to a bar's widgets list; bind Mod+N:
 Key([mod], "n", lazy.function(lambda qtile: TaskOverlay.toggle(qtile)))

@@ -1,0 +1,31 @@
+{
+  "schema": "kosmic.work-review/1",
+  "identity": "qtile-pomodoro/quick-task/2026-09-09-break-overlay-diagnostics",
+  "record_path": "specs/quick-tasks/2026-09-09-break-overlay-diagnostics.md",
+  "review_base": "5b6f1ddb76cb7bb030412abab07c970750b4c3a4",
+  "reviewed_revision": "66b4d1db8930107eeb359d2d28ee60bd8261a7d2697589bd369ed482e63fedbc",
+  "round": 2,
+  "standards": {
+    "decision": "approved",
+    "reviewer": "RepairStandardsReview",
+    "observation": "Round2: STD-001 resolved; README upgrade status/stats both invoke installed Qtile interpreter. No remaining blocker or focused-edit regression. Static review only."
+  },
+  "spec": {
+    "decision": "approved",
+    "reviewer": "RepairSpecReview",
+    "observation": "Round1 approved source behavior, persisted recovery regressions, occupied-workspace restacking, cleanup and controls; focused round2 README interpreter correction introduces no spec regression. Static review only."
+  },
+  "findings": [
+    {
+      "id": "STD-001",
+      "axis": "standards",
+      "disposition": "Blocking",
+      "status": "resolved",
+      "introduced_round": 1,
+      "resolved_round": 2,
+      "evidence": "README upgrade prechecks used wrapper despite documented system-Python shebang/import failure on this workstation.",
+      "resolution": "Status and stats prechecks now explicitly invoke /path/to/qtile/bin/python -m qtile_pomodoro.cli."
+    }
+  ],
+  "decision": "approved"
+}

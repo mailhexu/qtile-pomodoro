@@ -10,3 +10,6 @@
 - date: 2026-09-09 | kind: publication | targets: [notes/using-the-task-overlay.md] | refs: fd25f6d3b3394a22c0adead7c552eb0aebdf12796c5783e522de4281cce8d1df->9c8319a7d41b2352060b5d3d4d6707c15ecaef1a733f396fc177b2d98a76293c | outcome: published | reason: ""
 
 - date: 2026-09-09 | kind: publication | targets: [notes/using-the-task-overlay.md] | refs: 9c8319a7d41b2352060b5d3d4d6707c15ecaef1a733f396fc177b2d98a76293c->25d4a5742bd86174356d04c4cc14f02b2e1a19e5543d9336a1aabe78500e39c4 | outcome: published | reason: ""
+
+- date: 2026-10-12 | kind: publication | targets: [notes/qtile-integration.md] | refs: bc1c0dc404d6a227aa807daeee40168896dcd8035389e37d358c91d7d308befe->42a0dc658428d8750ce54f60bb8b65a84e1ade6bd4fbaec60958d63dddc52642 | outcome: published | reason: "" | provenance_source: bootstrap
+- date: 2026-10-12 | kind: publication | targets: [notes/using-the-timer.md] | refs: 9291c267ac76e39b25e1cbd0a0955e3bfe73c107bb311786c62184f21d6113af->60cfb7cb39de96e6630e27729e70d6e7279185910465261cdeed98986ee505c2 | outcome: published | reason: "" | provenance_source: bootstrap

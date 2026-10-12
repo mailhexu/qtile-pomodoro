@@ -3,7 +3,7 @@ type: Agent Skill
 title: qtile-pomodoro Development Skill
 status: stable
 name: qtile-pomodoro-development
-description: Contribute to the implementation and development infrastructure of qtile-pomodoro.
+description: Use when changing, testing, reviewing, or releasing qtile-pomodoro implementation or development infrastructure.
 audience: development
 ---
 
@@ -16,6 +16,19 @@ Working State: `working-tree`
 ## Required companion
 
 Load `qtile-pomodoro-usage` before contributor work that invokes, configures, integrates, or troubleshoots the Project.
+
+## Work record authority
+
+- Project: `qtile-pomodoro`; canonical records: `/home/hexu/projects/qtile_pomodoro/memnotes/Projects/qtile-pomodoro/specs` and `/home/hexu/projects/qtile_pomodoro/memnotes/Projects/qtile-pomodoro/subprojects`.
+- Shared knowledge stays at `/home/hexu/projects/qtile_pomodoro/memnotes/Projects/qtile-pomodoro/notes`, `/home/hexu/projects/qtile_pomodoro/memnotes/Projects/qtile-pomodoro/mathdocs`, and `/home/hexu/projects/qtile_pomodoro/memnotes/Projects/qtile-pomodoro/skills`; never copy it into a subproject.
+- Before substantive source, docs, vault, config or experiment changes, select/create a governing record through Kosmic. Feature implementation requires an approved owner-local Story/Epic/Architecture/PRD hierarchy; standalone low-risk work requires an approved Quick Task.
+- Draft planning/initialization creates only its explicitly bounded record and planning outputs. PRD success is not implementation approval. Migration and installation still require their own approved plans.
+- Register the exact working root; a fixed subproject constrains that directory, never selects an active task. Inspect the current record with `work show --project /home/hexu/projects/qtile_pomodoro/memnotes/Projects/qtile-pomodoro --record RECORD_REF`. No shared mutable selection pointer is permitted.
+- Start writable work in a clean dedicated worktree. Pass the approved governing record explicitly as --work-record to each checked mutating command. One record, one worktree, one writer; reconcile concurrent changes through Git.
+- Every changed worktree path must fit the declared --scope at work finish. Dirty worktrees are refused at start; out-of-scope paths block completion. Raw editors/shell remain agent compliance, not an OS sandbox.
+- Questions, searches and unchanged checks are record-free and read-only: no implicit cleanup, generated publication or installation. Read-only maintenance reports instead of deleting.
+- After actual acceptance/smoke evidence and pinned two-axis review, use `work finish --work-record RECORD_REF --worktree PATH --scope worktree:PATH`. It publishes the status/index/log and successful receipt atomically. Unreceipted done is pending; rerun finish after interruption.
+- Completion reports name the qualified record and canonical path plus actual acceptance/smoke/review results; a command exit code or checkbox alone is not acceptance evidence.
 
 ## Topics
 

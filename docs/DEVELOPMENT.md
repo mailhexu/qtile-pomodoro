@@ -27,8 +27,9 @@ Consequences:
 - `pipx install` puts the CLI in its own isolated venv: the CLI would work,
   but `config.py` (loaded by Qtile's interpreter) cannot import the widget.
   This is why installation targets Qtile's environment (see README).
-- The `qtile-pomodoro` console script lands in `~/.local/bin`, which is on
-  `PATH`; shebang points into the uv venv, so it works from any shell.
+- Invoke the daemon with that interpreter and `-m qtile_pomodoro.cli`.
+  A `qtile-pomodoro` script on `PATH` can have an old/system-Python shebang;
+  do not assume the script uses the environment just upgraded.
 
 ## Qtile 0.37 widget API gotchas
 
@@ -39,10 +40,11 @@ Consequences:
 - `Popup` takes **`fontsize`**, not `font_size`. The wrong name is silently
   ignored via `Configurable` defaults, so text renders at 14pt instead of the
   requested size — no error anywhere.
-- After any package change you must restart Qtile
-  (`qtile cmd-obj -o cmd -f restart`), not merely reload config: config
-  reload re-imports `config.py`, but the previously imported
-  `qtile_pomodoro` module stays cached in Qtile's process.
+- Package upgrades require replacing **two** in-memory copies: restart Qtile
+  (`qtile cmd-obj -o cmd -f restart`) to clear its module cache, and replace
+  the long-lived Timer Service process as described below. Config reload
+  re-imports `config.py`, but leaves `qtile_pomodoro` cached; a Qtile restart
+  alone leaves a surviving daemon's cached `core` unchanged.
 
 ## Popup text rendering
 
@@ -85,8 +87,9 @@ did nothing.
   ```text
   ~/.local/share/qtile/qtile.log
   ```
-- Rapid overlay test: set `focus_minutes = 1`, `reload`, `reset`, `start`;
-  restore afterwards. An aborted focus session is not counted in stats.
+- Rapid overlay tests may use one-minute focus in an isolated test store.
+  Do not change the user's config or run `reset`/`start` against an active
+  saved timer to verify an upgrade; that would abort or alter its phase.
 
 ## Runtime state on this workstation
 
@@ -113,6 +116,59 @@ the guard whenever the service answers again.
 - Integration in `~/.config/qtile/config.py`: widget import, `startup_once`
   daemon launch, and `mod+p` / `mod+shift+p` / `mod+ctrl+p` /
   `mod+ctrl+shift+p` / `mod+alt+p` keybindings.
+
+### State-preserving package deployment
+
+Follow the [README upgrade sequence](../README.md#upgrading-without-losing-an-active-timer).
+Use the same Qtile interpreter, XDG environment and store for the replacement;
+do not copy an empty database over the existing one.
+
+- Capture status and history before replacement with the target interpreter:
+
+  ```bash
+  ~/.local/share/uv/tools/qtile/bin/python -m qtile_pomodoro.cli status --json
+  ~/.local/share/uv/tools/qtile/bin/python -m qtile_pomodoro.cli stats
+  ss -xlpn
+  ```
+
+  Locate the exact socket path from the workstation notes above (using the
+  same `XDG_RUNTIME_DIR`, or `/tmp` when unset). Confirm one listening owner,
+  its command line and its start time with `ps -p PID -o pid,lstart,args`.
+  If there are multiple or unidentifiable owners, stop and resolve ownership;
+  never use a broad process-name kill.
+- Install into Qtile's interpreter and restart Qtile, not just its config.
+  Inspect the socket owner again. An old daemon may survive; only send
+  `kill -TERM PID` after rechecking that PID is the known old socket owner.
+  Do not stop a replacement that already started.
+- The widget automatically launches a replacement when it observes the
+  missing service. Prefer that single launch owner, then confirm the new
+  socket owner's process start time and status response. Do not combine it
+  with a manual launch. A manual launch is appropriate only when automatic
+  launching is disabled, the old process has exited and no listener remains:
+  use the Qtile interpreter with `-m qtile_pomodoro.cli daemon`.
+- Preserve the original SQLite store and saved deadline. Do not issue
+  `reset`, `start`, `skip` or rewrite session history for deployment.
+  An unexpired running focus resumes with the **original** deadline and
+  counter/history, not a new full interval. An overdue focus is completed
+  once by the current daemon's recovery and enters a fresh break whose
+  deadline starts at recovery time. Recovery never silently catches up
+  through more phases; compare post-upgrade status/history accordingly.
+
+### Stale daemon incident: focus running at zero
+
+The observed CLI and normally polling Qtile both reported `focus`, `running`,
+`0s` with an expired deadline. The daemon had started at 15:12:33, before the
+status-expiry fix was installed at 15:48, and still held the old implementation
+in memory. Installing the fix and restarting only Qtile did not update it.
+The current `Timer.status()` completes an expired phase even without a live
+ticker. The timeout diagnosis was disproven by successful status responses and
+normal widget polling; increasing the polling timeout is not the remedy for
+this stale-runtime failure. The old daemon's ticker was no longer advancing,
+but why it stopped was not captured and remains unknown.
+
+`tests/test_core.py` covers status expiry without a ticker and replacement
+before/after expiry using the real temporary SQLite store and a controlled
+clock. It never opens the user's state or launches desktop notifications.
 
 ## Known limitations (accepted in design)
 

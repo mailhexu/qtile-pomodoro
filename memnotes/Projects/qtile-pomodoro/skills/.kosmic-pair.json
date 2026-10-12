@@ -2,13 +2,13 @@
   "development": {
     "name": "qtile-pomodoro-development",
     "requires": "qtile-pomodoro-usage",
-    "sha256": "3e1db09193be97c7e33c224cef24ccd50c6be7cccec48fff7bd2b51198aec7bb"
+    "sha256": "e7c8558e1ce7fc8ba3335a51eb568ec31beb0c565f9baaf02af26f050a30768c"
   },
-  "generator_version": 2,
+  "generator_version": 4,
   "project_id": "qtile-pomodoro",
   "usage": {
     "name": "qtile-pomodoro-usage",
-    "sha256": "4bf67632e019fbc8953b6a7ebfae7a524f6470ddadf465149f23b5d4abeda105"
+    "sha256": "a32ca2f48ec7167a5ddd86a398a9563f7c38c5d336cafe22e86603891354e5ef"
   },
   "working_state": "working-tree"
 }

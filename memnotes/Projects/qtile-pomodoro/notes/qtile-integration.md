@@ -13,3 +13,19 @@ Qtile runs in its own UV-managed Python environment. Install this package with `
 Use `sys.executable -m qtile_pomodoro.cli` from Qtile configuration and widgets. Do not launch the `~/.local/bin/qtile-pomodoro` wrapper: its system-Python shebang cannot import the package when user site-packages are disabled.
 
 Qtile 0.37 provides `base.InLoopPollText`, not `ThreadPoolText`. Package upgrades require a Qtile restart because configuration reload does not reload imported package modules.
+
+The Timer Service has a separate Python module cache and survives a Qtile
+restart. Installing new code does not change that process. During deployment,
+identify and replace only the socket-owning daemon, preventing the widget's
+self-heal from racing a manual replacement. Reuse persisted state rather than
+resetting the timer. A daemon started before a transition fix can otherwise
+keep reporting an expired focus at zero even while the widget polls normally.
+
+Qtile 0.37's X11 `Popup.place(above=True)` does not raise a group-less Internal
+window: `change_layer()` returns early for it. A reused break popup can remain
+below application windows on other workspaces even while mapped and focused.
+Configure the X window with `StackMode.Above` after mapping and from the active
+overlay's `setgroup` hook, which fires after workspace clients are mapped.
+Unsubscribe that hook and dispose of popups/layouts during widget finalization.
+Verify root stacking and focus on occupied workspaces; an empty-workspace
+screenshot or a mapped-window flag alone does not establish overlay visibility.

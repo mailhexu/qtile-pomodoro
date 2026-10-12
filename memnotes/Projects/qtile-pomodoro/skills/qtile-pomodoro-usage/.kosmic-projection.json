@@ -1,5 +1,5 @@
 {
-  "generator_version": 2,
+  "generator_version": 4,
   "name": "qtile-pomodoro-usage",
   "project_id": "qtile-pomodoro",
   "requires": [],
@@ -15,7 +15,7 @@
       "audience": "usage",
       "path": "notes/using-the-timer.md",
       "reference": "references/using-the-timer.md",
-      "sha256": "9291c267ac76e39b25e1cbd0a0955e3bfe73c107bb311786c62184f21d6113af"
+      "sha256": "60cfb7cb39de96e6630e27729e70d6e7279185910465261cdeed98986ee505c2"
     }
   ],
   "working_state": "working-tree"

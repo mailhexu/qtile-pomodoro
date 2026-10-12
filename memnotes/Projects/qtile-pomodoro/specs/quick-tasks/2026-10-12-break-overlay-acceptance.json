@@ -1,0 +1,37 @@
+{
+  "schema": "kosmic.acceptance-evidence/1",
+  "identity": "qtile-pomodoro/quick-task/2026-09-09-break-overlay-diagnostics",
+  "record_path": "specs/quick-tasks/2026-09-09-break-overlay-diagnostics.md",
+  "results": [
+    {
+      "criterion": "Expired focus produces a running break rather than `focus/running/0s`.",
+      "outcome": "passed",
+      "observation": "Before: actual socket owner returned overdue focus/running/0s/overlay false. After replacing the stale daemon: short_break/running/300s/overlay true; counter229->230 and history230->231 exactly once. Corrected Timer.status persisted expiry regression passes.",
+      "artifacts": [{"path": "log/qtile-pomodoro-2026-10-12.md", "sha256": "bb4b4cf7bbb03f2641da0757e5e5a9cdddc2414b4b1b0846479a2ae0c0e15ef0"}]
+    },
+    {
+      "criterion": "The break popup stacks above clients on occupied workspaces after switches.",
+      "outcome": "passed",
+      "observation": "Before: reused popup root-stack10 below clients13/16/23/30. After: actual X11 controller switched occupied groups1/2/4/9; popup stack32 above every client, viewable and focused each time without a poll. Presented desktop screenshot visibly shows full dark BREAK02:03 and skip button.",
+      "artifacts": [{"path": "log/qtile-pomodoro-2026-10-12.md", "sha256": "bb4b4cf7bbb03f2641da0757e5e5a9cdddc2414b4b1b0846479a2ae0c0e15ef0"}]
+    },
+    {
+      "criterion": "A non-expired focus deadline survives daemon replacement unchanged.",
+      "outcome": "passed",
+      "observation": "Actual subsequent live replacement retained deadline1791792364.3931727, cycle counter230 and all231 history rows. Real temporary SQLite recovery regressions also preserve deadline/history/counter, including fresh-break recovery after overdue focus.",
+      "artifacts": [{"path": "log/qtile-pomodoro-2026-10-12.md", "sha256": "bb4b4cf7bbb03f2641da0757e5e5a9cdddc2414b4b1b0846479a2ae0c0e15ef0"}]
+    },
+    {
+      "criterion": "No debug scaffolding or unrelated feature changes remain.",
+      "outcome": "passed",
+      "observation": "Removed per-poll debug capture. Temporary live controllers finalized, runtime smoke/image attributes deleted, original workspace/application focus restored; no image/script files persisted. No task-data/config/history rewrites. Approved migration normalized only active Quick Task and Project knowledge metadata/projections; no feature hierarchy relocation.",
+      "artifacts": [{"path": "log/qtile-pomodoro-2026-10-12.md", "sha256": "bb4b4cf7bbb03f2641da0757e5e5a9cdddc2414b4b1b0846479a2ae0c0e15ef0"}]
+    },
+    {
+      "criterion": "Regression checks, live verification, review, and knowledge updates pass.",
+      "outcome": "passed",
+      "observation": "70 tests passed with actual Qtile dependencies, no skipped overlay regression module. Live recovery, non-expired replacement and occupied-workspace/visual smoke passed. Independent Standards/Spec round2 approved after STD-001 README interpreter correction. Consumer/contributor knowledge updated and migrated Skill Pair validated.",
+      "artifacts": [{"path": "log/qtile-pomodoro-2026-10-12.md", "sha256": "bb4b4cf7bbb03f2641da0757e5e5a9cdddc2414b4b1b0846479a2ae0c0e15ef0"}]
+    }
+  ]
+}

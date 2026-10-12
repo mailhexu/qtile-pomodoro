@@ -6,6 +6,7 @@ kosmic_generated: true
 project_id: qtile-pomodoro
 working_state: working-tree
 audience: usage
+artifact_role: ""
 source: notes/using-the-task-overlay.md
 source_sha256: 25d4a5742bd86174356d04c4cc14f02b2e1a19e5543d9336a1aabe78500e39c4
 ---

@@ -1,0 +1,14 @@
+{
+  "completed_at": "2026-10-12T07:49:55Z",
+  "detail": "",
+  "identity": "qtile-pomodoro/quick-task/2026-09-09-break-overlay-diagnostics",
+  "proof": {
+    "log/qtile-pomodoro-2026-10-12.md": "bb4b4cf7bbb03f2641da0757e5e5a9cdddc2414b4b1b0846479a2ae0c0e15ef0",
+    "specs/quick-tasks/2026-10-12-break-overlay-acceptance.json": "3e8f993891bca9e1ceac7cf638dcd50be4854fa6953625165ee82432dc89622a",
+    "specs/quick-tasks/2026-10-12-break-overlay-review.json": "d81edf21a85dd56cb5acfb3e729d93e22377afcc2183a041c22e0b53f14d1151"
+  },
+  "record_path": "specs/quick-tasks/2026-09-09-break-overlay-diagnostics.md",
+  "record_sha256": "a48c96ef8679aef1281d5efb47e0e33c00a525adfe7e240049d75e3482dcdb8a",
+  "schema": "kosmic.work-receipt/1",
+  "status": "successful"
+}

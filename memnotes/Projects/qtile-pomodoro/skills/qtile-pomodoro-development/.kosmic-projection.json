@@ -1,5 +1,5 @@
 {
-  "generator_version": 2,
+  "generator_version": 4,
   "name": "qtile-pomodoro-development",
   "project_id": "qtile-pomodoro",
   "requires": [
@@ -11,7 +11,7 @@
       "audience": "development",
       "path": "notes/qtile-integration.md",
       "reference": "references/qtile-integration.md",
-      "sha256": "bc1c0dc404d6a227aa807daeee40168896dcd8035389e37d358c91d7d308befe"
+      "sha256": "42a0dc658428d8750ce54f60bb8b65a84e1ade6bd4fbaec60958d63dddc52642"
     }
   ],
   "working_state": "working-tree"

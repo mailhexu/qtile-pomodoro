@@ -3,7 +3,7 @@ project_id: qtile-pomodoro
 subproject_id: null
 record_kind: quick-task
 local_id: 2026-09-09-break-overlay-diagnostics
-status: approved
+status: done
 created: 2026-09-09
 updated: 2026-10-12
 related_notes:
@@ -18,9 +18,10 @@ routine_edge_change: false
 routine_decision_required: false
 routine_proposals: []
 review_base: 5b6f1ddb76cb7bb030412abab07c970750b4c3a4
-review_round: 0
-acceptance_evidence: []
-review_record: ""
+review_round: 2
+acceptance_evidence:
+  - specs/quick-tasks/2026-10-12-break-overlay-acceptance.json
+review_record: specs/quick-tasks/2026-10-12-break-overlay-review.json
 evidence_packs: []
 ---
 
@@ -50,11 +51,11 @@ stops responding.
 
 ## Acceptance Criteria
 
-- [ ] Expired focus produces a running break rather than `focus/running/0s`.
-- [ ] The break popup stacks above clients on occupied workspaces after switches.
-- [ ] A non-expired focus deadline survives daemon replacement unchanged.
-- [ ] No debug scaffolding or unrelated feature changes remain.
-- [ ] Regression checks, live verification, review, and knowledge updates pass.
+- [x] Expired focus produces a running break rather than `focus/running/0s`.
+- [x] The break popup stacks above clients on occupied workspaces after switches.
+- [x] A non-expired focus deadline survives daemon replacement unchanged.
+- [x] No debug scaffolding or unrelated feature changes remain.
+- [x] Regression checks, live verification, review, and knowledge updates pass.
 
 ## Implementation Notes
 
@@ -70,7 +71,14 @@ listed above without claiming the earlier work completed.
 
 ## Verification
 
-- Pending user reproduction.
+- Full suite with actual Qtile dependencies: 70 passed.
+- Live stale-daemon replacement: one recovered focus, break 300s, count 230.
+- Actual X11 switches on occupied groups 1/2/4/9: popup viewable, focused,
+  and above every client without another polling cycle.
+- Live non-expired daemon replacement preserved deadline 1791792364.3931727,
+  cycle count 230, and history 231.
+- Actual presented screenshot: full dark BREAK 02:03 plus skip control.
+- Details: [recurrence repair observations](../../log/qtile-pomodoro-2026-10-12.md).
 
 ## Links
 
@@ -79,6 +87,12 @@ listed above without claiming the earlier work completed.
 
 ## Review
 
-- [ ] Diff reviewed against scope.
-- [ ] Acceptance criteria satisfied.
+- [x] Diff reviewed against scope.
+- [x] Acceptance criteria satisfied.
 - [ ] Status set to `done` only after verification passes.
+
+Independent Standards and Spec reviewers approved round 2. Standards finding
+STD-001 (README upgrade checks must use Qtile's interpreter) is resolved.
+Lifecycle stays `in_progress` until `work finish` writes the completion receipt:
+the installed tool rejects `review` as implementation authority despite its
+documented lifecycle. No terminal status is assigned by hand.

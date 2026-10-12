@@ -6,6 +6,9 @@ import subprocess
 import sys
 from typing import Any
 
+from xcffib.xproto import StackMode
+
+from libqtile import hook
 from libqtile.popup import Popup
 from libqtile.widget import base
 
@@ -27,26 +30,36 @@ class BreakOverlays:
     def __init__(self, qtile: Any):
         self.qtile = qtile
         self.popups: list[Popup] = []
+        self.active = False
+        hook.subscribe.setgroup(self._restack)
 
-    def _record_debug(self, state: dict[str, Any], command: str | None) -> None:
-        focus = self.qtile.core.conn.conn.core.GetInputFocus().reply().focus
-        self.qtile.pomodoro_overlay_debug = {
-            "command": command, "phase": state["phase"],
-            "status": state["status"], "overlay": state.get("overlay"),
-            "group": self.qtile.current_screen.group.name, "focus": focus,
-            "popups": [
-                (popup.win.wid, popup.win.hidden, popup.x, popup.y,
-                 popup.width, popup.height)
-                for popup in self.popups
-            ],
-        }
+    def _restack(self) -> None:
+        if not self.active:
+            return
+        # setgroup fires after the new group's clients are mapped and focused.
+        # Internal.change_layer (used by Popup.place) ignores group=None windows.
+        for popup in self.popups:
+            popup.win.window.configure(stackmode=StackMode.Above)
+        for screen, popup in zip(self.qtile.screens, self.popups):
+            if screen is self.qtile.current_screen:
+                popup.win.focus()
+                break
+
+    def finalize(self) -> None:
+        self.active = False
+        hook.unsubscribe.setgroup(self._restack)
+        for popup in self.popups:
+            popup.timer_layout.finalize()
+            popup.button_layout.finalize()
+            popup.kill()
+        self.popups.clear()
 
     def sync(self, state: dict[str, Any]) -> None:
         command = ("skip" if state.get("overlay") else
                    "start" if state["status"] == "resume" else None)
+        self.active = command is not None
         if command is None:
             for popup in self.popups: popup.hide()
-            self._record_debug(state, command)
             return
         seconds = state["remaining"]
         text = (f"BREAK\n{seconds // 60:02d}:{seconds % 60:02d}"
@@ -97,15 +110,14 @@ class BreakOverlays:
             popup.draw()
             popup.place()
             popup.unhide()
-            popup.win.focus()
-        self._record_debug(state, command)
+        self._restack()
 
     def activate(self, x: int, y: int, button: int, height: int, command: str) -> None:
-        if button == 1 and y >= height * 2 // 3:
+        if self.active and button == 1 and y >= height * 2 // 3:
             subprocess.Popen(_command(command))
 
     def keypress(self, keysym: Any, command: str) -> None:
-        if command == "start" and str(keysym).lower() in {"space", "32"}:
+        if self.active and command == "start" and str(keysym).lower() in {"space", "32"}:
             subprocess.Popen(_command("start"))
 
 
@@ -117,6 +129,12 @@ class Pomodoro(base.InLoopPollText):
         self.add_defaults(self.defaults)
         self.overlays: BreakOverlays | None = None
         self._daemon_spawned = False
+
+    def finalize(self) -> None:
+        if self.overlays is not None:
+            self.overlays.finalize()
+            self.overlays = None
+        super().finalize()
 
     def poll(self) -> str:
         state = _status()
