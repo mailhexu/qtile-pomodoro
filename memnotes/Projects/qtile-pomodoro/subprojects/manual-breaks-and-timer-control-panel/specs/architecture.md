@@ -9,7 +9,11 @@ updated: 2026-10-15
 linked_prd: prd.md
 linked_research:
   - research/2026-10-15-toml-settings.md
-linked_stories: []
+linked_stories:
+  - stories/story-001.md
+  - stories/story-002.md
+  - stories/story-003.md
+  - stories/story-004.md
 linked_epics:
   - epics/epic-001.md
 ---
@@ -168,6 +172,9 @@ booleans and partial/unknown settings payloads. Invalid input returns an error
 before expiry settlement or any file/state write. A valid save settles an
 already-expired phase using the previously applied settings, then changes
 future-phase defaults; it never retimes the phase that just became active.
+Unknown-key rejection applies to the incoming Save payload. When loading/editing
+the file, validate the four owned timer values and retain unrelated keys rather
+than newly rejecting a config solely for additional `[timer]` key names.
 
 Read the file afresh, replace only the four `[timer]` values and validate the
 rendered result. Write a same-directory temporary file, flush and `fsync` its
@@ -185,12 +192,18 @@ Filesystem replacement and SQLite are not one global transaction. Distinguish:
 - `applied`: file replacement is durable and future defaults were applied;
 - `saved_not_applied`: durable replacement succeeded but daemon application failed;
 - `rejected`: validation or pre-replacement persistence failed;
-- `unknown`: the reply was lost, or post-replacement synchronization failed and
-  the visible replacement is not known durable. Never classify this as rejected
-  or claim the original file is unchanged; retain previously applied runtime
-  defaults, report the uncertainty, and do not blindly roll back or resubmit.
-  Read-only refresh alone cannot upgrade uncertain durability to a successful
-  persistent save; a later explicit successful Save establishes it.
+- `unknown`: the client lost the reply, or the service detected post-replacement
+  synchronization failure. These are different failure locations:
+  - On a detected synchronization failure before application, retain the old
+    runtime defaults; the replacement may be visible but is not known durable.
+    Do not call it rejected or claim the original file is unchanged. Read-only
+    observation of that file cannot prove durability; a later explicit successful
+    Save can establish it.
+  - A reply may be lost after a fully durable save and successful application.
+    The client cannot assume old defaults remain, undo the change, or claim
+    success. Read-only reconciliation reports authoritative current settings and
+    the service's known outcome, without treating mere file visibility as proof.
+  Neither path automatically rolls back or resubmits the mutation.
 
 Keep saved/applied timer settings and the latest application outcome in the
 service snapshot; no full TOML or token is exposed. Reload retries application

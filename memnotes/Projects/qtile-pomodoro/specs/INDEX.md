@@ -5,7 +5,7 @@
 - [Minimal Qtile Task Overlay](../subprojects/minimal-qtile-task-overlay/specs/INDEX.md)
 - [Todoist Client Sync](../subprojects/prd-todoist-client-sync/specs/INDEX.md)
 - [Local Task Undo](../subprojects/prd-undo-task-completion-and-move/specs/INDEX.md)
-- [Manual Breaks and Timer Control Panel](../subprojects/manual-breaks-and-timer-control-panel/specs/INDEX.md) — PRD/architecture approved; delivery epic draft awaiting approval.
+- [Manual Breaks and Timer Control Panel](../subprojects/manual-breaks-and-timer-control-panel/specs/INDEX.md) — PRD/architecture/epic approved; four stories draft awaiting implementation approval.
 
 Existing feature records retain their historical lifecycle states and acceptance
 notes; relocation does not grant new approvals or completion receipts.

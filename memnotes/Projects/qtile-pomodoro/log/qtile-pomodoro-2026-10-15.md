@@ -71,3 +71,33 @@ Qualified identity: `qtile-pomodoro/manual-breaks-and-timer-control-panel/prd/pr
   guard mismatch. No terminal migration record was reopened to bypass it;
   current canonical records/indexes are authoritative for this approval gate.
 - No application source, dependencies, runtime state or settings were changed.
+
+## Epic Approval and Story Approval Bundle
+
+- User approved Epic001. Reserved canonical story001..004 under the same owner
+  through the normal CLI; all four remain draft, with no fictional approval or
+  implementation evidence. Four disjoint author agents populated their records.
+- Dependencies are 001 -> 002 -> 003 -> 004 (003 requires001/002;004requiresall);
+  predecessor acceptance/receipt is required before successor implementation.
+- 001ownsreal held-focus/original-duration/action snapshots;002ownssettings/save
+  outcomes;003ownsprotocol_version2,sharedasyncclient/controller/hookinfrastructure;
+  004reusesitfornativepanelandend-to-enddelivery. No future UI/backend stubs.
+- Catalog/link check passed: four correct IDs, each draft with three approved
+  ancestors, exact dependency lists, valid active links and no application changes.
+  The first checker compared catalog tuples to lists; correcting that harness
+  representation resolved the check without any record mutation.
+- Independent story Standards/Spec review found bounded planning contradictions:
+  missing command-availability producer, focus-reset preservation wording, invalid
+  payload/time-settlement order, and conflated lost-reply versus known sync-failure
+  outcomes. Unknown file-key rejection also exceeded the requested validation scope.
+- Corrected all findings, including the narrow ADR-012 outcome clarification:
+  reply loss may follow successful save/application, so old defaults cannot be
+  inferred. No requested functionality or accepted scope was removed.
+- Focused round2 reviewers marked STORY-SPEC-001..004 and STORY-STD-001..002
+  resolved/ready; review was documentary only. Per-story review_base/evidence fields
+  stay empty until real implementation research, tests, smoke and review occur.
+- STATUS generation with draftStory001 was attempted and rejected as draft not
+  authorizing implementation (known planning-authority guard issue). Canonical
+  records/indexes remain authoritative; no unrelated approved/terminal record was
+  selected to bypass it. Story approval will provide normal implementation authority.
+- No application code, dependencies, tests, configuration or live timer were changed.

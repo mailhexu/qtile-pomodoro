@@ -3,12 +3,16 @@ project_id: qtile-pomodoro
 subproject_id: manual-breaks-and-timer-control-panel
 record_kind: epic
 local_id: "001"
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-15
 linked_prd: ../prd.md
 linked_architecture: ../architecture.md
-linked_stories: []
+linked_stories:
+  - ../stories/story-001.md
+  - ../stories/story-002.md
+  - ../stories/story-003.md
+  - ../stories/story-004.md
 ---
 
 # Epic 001: Manual Breaks and Timer Control Panel
@@ -21,8 +25,8 @@ The complete value is one usable panel backed by the existing authoritative
 Timer Service, with correct accounting, recovery and all-workspace overlays.
 
 Parents: [approved PRD](../prd.md) and [approved architecture](../architecture.md).
-This epic is a draft. The table below proposes story boundaries; it does not
-reserve story identities, approve stories, or authorize implementation.
+The user approved this epic. Its four allocated story records remain draft and
+require implementation approval; epic approval alone does not authorize code.
 
 ## Scope
 
@@ -55,17 +59,33 @@ reserve story identities, approve stories, or authorize implementation.
   file watching, or new optimistic concurrency/retry machinery.
 - Source/configuration/runtime changes before the corresponding story is approved.
 
-## Proposed Stories
+## Implementation Stories
 
-These are proposed titles/slices, not allocated story IDs. Create their canonical
-records only after epic approval, then obtain story approval before coding.
+Canonical records were allocated after epic approval. The dependencies below
+define implementation order; all four stories still require approval before coding.
 
-| Proposed story | Delivered behavior | Dependency |
+| Story | Delivered behavior | Dependency |
 |---|---|---|
-| Manual-break state, accounting and recovery | CLI manual short/long breaks hold unfinished focus; reset/skip/resume work correctly; state/history commit together and daemon ownership precedes recovery writes. | Approved PRD/architecture and this epic |
-| Durable timer-settings persistence | CLI settings save validates the four fields, preserves unrelated TOML, reports durable/applied/unknown outcomes and changes only future intervals. | Manual-break state snapshots established |
-| Asynchronous timer client and Qtile controller | CLI/bar/overlays share one nonblocking transport and authoritative snapshot; lifecycle, timeout, stale-protocol and self-heal behavior are coherent. | State and settings command contracts established |
-| Native control panel and end-to-end delivery | Click-to-open controls/settings, Controls during a break/gate, keyboard/mouse editing and coordinated screen/workspace behavior; full integration, docs and safe deployment. | All preceding slices |
+| [001: Manual-break state, accounting and recovery](../stories/story-001.md) | CLI manual breaks, held-focus recovery and atomic accounting. | Approved parents |
+| [002: Durable timer-settings persistence](../stories/story-002.md) | Validated, lossless, durable settings saves for future phases. | 001 |
+| [003: Asynchronous client and Qtile controller](../stories/story-003.md) | Shared nonblocking CLI/bar/overlay transport and lifecycle. | 001, 002 |
+| [004: Native control panel and delivery](../stories/story-004.md) | Controls/settings UI, full integration, knowledge and safe deployment. | 001, 002, 003 |
+
+### Cross-story contracts
+
+- Story001 owns real held-focus/state/accounting command results; Story002 owns
+  real settings/save-outcome payloads. Document stable snapshot field names at
+  dependency completion before Story003 begins; do not add dummy future payloads.
+- Story003 owns the `protocol_version: 2` marker and shared client/controller
+  cutover, including overlay hooks and deferred-restack cleanup. Story004 extends
+  that same owner for the panel, without a second hook/controller infrastructure.
+- Successor implementation starts after predecessor acceptance/receipt, not just
+  predecessor approval. Earlier slices remain usable at their own service/CLI or
+  bar/overlay seam; the whole feature is deployed only after integration is ready.
+- Story001 produces `held_focus`, `focus_original_seconds` and meaningful service-
+  derived `available_commands`. Story002 produces `settings.saved/applied/outcome`
+  and extends real action availability. Story003 consumes those frozen names and
+  adds only the protocol marker; no field producer is delegated to the panel.
 
 ### Slice Acceptance to Carry into Stories
 
@@ -154,6 +174,25 @@ panel, and a popup without persistence/recovery is not a completed epic.
 
 ## Progress
 
-- Proposed stories: 4; allocated: 0; implemented: 0.
-- Status: draft, awaiting epic approval before story creation.
+- Stories: 4 allocated; 0 approved; 0 implemented.
+- Epic: approved; stories: draft, awaiting implementation approval.
 - Last updated: 2026-10-15.
+
+## Story-Bundle Pre-Approval Review
+
+All four story records remain draft. Independent Standards and Spec reviewers
+examined their planning contracts; focused round-2 re-review found all findings
+resolved. This is not an implementation test, code-review receipt or story approval.
+
+| Axis finding | Resolution |
+|---|---|
+| STORY-SPEC-001 | Backend producers assigned: 001 supplies held-focus/original interval/action availability; 002 supplies settings outcomes and extends actions; 003 consumes the frozen contract and adds the protocol marker. |
+| STORY-SPEC-002 | Focus Reset clears the checkpoint; Break Reset preserves it; natural completion records the original interval before releasing metadata. |
+| STORY-SPEC-003 / STORY-STD-002 | Known post-replacement sync failure and lost client reply are distinct; a lost reply cannot imply old runtime settings. Read-only reconciliation, no automatic rollback/resubmission. |
+| STORY-SPEC-004 | Structural/payload validation precedes time settlement; valid actions reconcile one expired phase before state-legality checks. |
+| STORY-STD-001 | Unknown Save request keys are rejected; additional config-file keys are preserved rather than newly rejected. |
+
+Clarifications also distinguish a running break deadline from the deadline-free
+held checkpoint and expired-focus history from expired-break gate transitions.
+PRD feature scope and the four-story order are unchanged. Implementation remains
+blocked on explicit approval of these story records.
