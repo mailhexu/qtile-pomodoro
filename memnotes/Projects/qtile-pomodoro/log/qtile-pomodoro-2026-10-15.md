@@ -52,3 +52,22 @@ Qualified identity: `qtile-pomodoro/manual-breaks-and-timer-control-panel/prd/pr
   Reported through automated QA; did not reopen a terminal record or change
   installed tooling. The successful migration finish had already regenerated
   STATUS with the approved PRD, draft architecture/research and completed migration.
+
+## Architecture Approval and Delivery Epic
+
+- User approved the architecture; its status and approval narrative now reflect
+  that decision. Approval does not grant implementation or deployment authority.
+- Reserved canonical draft epic `manual-breaks-and-timer-control-panel/epic/001`
+  through the normal CLI, linked to the approved architecture and PRD.
+- Proposed four story slices: manual-break state/accounting/recovery; durable
+  settings persistence; async client/shared Qtile controller; native panel and
+  full integration/deployment. Dependencies and full acceptance are in the epic.
+- No story records were created: the current workflow requires epic approval
+  first, followed by approval of the allocated story records before coding.
+- Read-only catalog check confirmed draft epic, two approved ancestors, valid
+  owner-local Markdown links and zero prematurely allocated stories.
+- The required STATUS event was attempted with the epic identity and refused
+  WORK_PHASE_DENIED, consistent with the already reported planning-authority
+  guard mismatch. No terminal migration record was reopened to bypass it;
+  current canonical records/indexes are authoritative for this approval gate.
+- No application source, dependencies, runtime state or settings were changed.

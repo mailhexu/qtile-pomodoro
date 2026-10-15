@@ -3,13 +3,15 @@ project_id: qtile-pomodoro
 subproject_id: manual-breaks-and-timer-control-panel
 record_kind: architecture
 local_id: architecture
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-15
 linked_prd: prd.md
 linked_research:
   - research/2026-10-15-toml-settings.md
 linked_stories: []
+linked_epics:
+  - epics/epic-001.md
 ---
 
 # Architecture: Manual Breaks and Timer Control Panel
@@ -323,15 +325,15 @@ versions fail clearly rather than being treated as legacy/default state.
 - TOMLKit is a new runtime dependency, not an already-verified installation or
   application-specific preservation guarantee.
 
-Architecture approval is required before creating epics/stories. Implementation,
-package installation, timer operations and configuration writes are not authorized
-by this draft or by the separate metadata-migration approval.
+The user approved this architecture. Epic and story approval gates still apply.
+Implementation, package installation, timer operations and configuration writes
+are not granted by architecture approval or the separate metadata migration.
 
 ## Pre-Approval Design Review
 
 Read-only core and UI reviewers examined this proposal against the approved PRD.
-Both slices are ready after focused round-2 re-review; human architecture approval
-is still required. No implementation, runtime or library-preservation test was run.
+Both slices passed focused round-2 re-review; subsequent user architecture approval
+is recorded in frontmatter. No implementation, runtime or library-preservation test was run.
 
 | Finding | Resolution | Re-review |
 |---|---|---|

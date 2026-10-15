@@ -7,7 +7,8 @@ status: approved
 created: 2026-10-15
 updated: 2026-10-15
 linked_research: []
-linked_epics: []
+linked_epics:
+  - epics/epic-001.md
 ---
 
 # Manual Breaks and Timer Control Panel
