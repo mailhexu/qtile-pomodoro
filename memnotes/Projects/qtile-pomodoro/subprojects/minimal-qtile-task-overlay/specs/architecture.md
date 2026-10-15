@@ -1,10 +1,14 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: minimal-qtile-task-overlay
+record_kind: architecture
+local_id: architecture
 status: approved
 created: 2026-09-04
 updated: 2026-09-04
 linked_prd: prd.md
 linked_research: []
-linked_stories: []
+linked_stories: [stories/story-001-task-store.md, stories/story-002-today-count-widget.md, stories/story-003-task-overlay.md]
 ---
 
 # Architecture: Minimal Qtile Task Overlay

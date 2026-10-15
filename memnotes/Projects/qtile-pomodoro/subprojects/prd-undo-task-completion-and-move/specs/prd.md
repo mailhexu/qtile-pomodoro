@@ -1,10 +1,15 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: prd-undo-task-completion-and-move
+record_kind: prd
+local_id: prd
 status: approved
 created: 2026-09-09
 updated: 2026-09-09
 feature: task-undo
-related_architecture: [architecture-task-undo.md]
-related_epics: []
+related_architecture: [architecture.md]
+related_epics: [epics/epic-001-local-task-undo.md]
+linked_epics: [epics/epic-001-local-task-undo.md]
 ---
 
 # PRD: Undo Task Completion and Move

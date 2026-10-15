@@ -1,10 +1,14 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: minimal-qtile-task-overlay
+record_kind: epic
+local_id: "001"
 status: done
 created: 2026-09-04
 updated: 2026-09-04
 linked_prd: ../prd.md
 linked_architecture: ../architecture.md
-linked_stories: [../stories/story-1-task-store.md, ../stories/story-2-today-count-widget.md, ../stories/story-3-task-overlay.md]
+linked_stories: [../stories/story-001-task-store.md, ../stories/story-002-today-count-widget.md, ../stories/story-003-task-overlay.md]
 ---
 
 # Epic 1: Minimal Qtile Task Overlay
@@ -33,9 +37,9 @@ Deliver a daemonless, Qtile-native task capture and review feature: Inbox and To
 
 | Story | Title | Status |
 |-------|-------|--------|
-| [story-1](../stories/story-1-task-store.md) | TaskStore with JSON persistence | done |
-| [story-2](../stories/story-2-today-count-widget.md) | TaskCount bar widget and config wiring | done |
-| [story-3](../stories/story-3-task-overlay.md) | Keyboard-driven TaskOverlay popup | done |
+| [story-1](../stories/story-001-task-store.md) | TaskStore with JSON persistence | done |
+| [story-2](../stories/story-002-today-count-widget.md) | TaskCount bar widget and config wiring | done |
+| [story-3](../stories/story-003-task-overlay.md) | Keyboard-driven TaskOverlay popup | done |
 
 ## Success Criteria
 

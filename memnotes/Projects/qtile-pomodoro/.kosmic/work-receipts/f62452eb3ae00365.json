@@ -1,0 +1,15 @@
+{
+  "completed_at": "2026-10-15T12:57:46Z",
+  "detail": "",
+  "identity": "qtile-pomodoro/quick-task/2026-10-15-legacy-feature-spec-migration",
+  "proof": {
+    "log/qtile-pomodoro-2026-10-15-spec-migration.md": "3c24401801e08c7e7abf308ba5bfe5d9f82df6c32e75655aa26dde8f8fef7f7f",
+    "specs/migration-plans/2026-10-15-owner-layout-acceptance.json": "2f058abb192545123b1b2e4817a9a696c53560389d02e386c615d75e93ba7b79",
+    "specs/migration-plans/2026-10-15-owner-layout-review.json": "d828487b5c7dba650cff016f37046ebb4a13bdbd802156897131cf23af90375f",
+    "specs/migration-plans/2026-10-15-owner-layout.json": "e20471e9f097753479214449c3163cf8cdcc06c3790df539c46ca65e1eff4b1a"
+  },
+  "record_path": "specs/quick-tasks/2026-10-15-legacy-feature-spec-migration.md",
+  "record_sha256": "bc7d5000367ae211c41b600c4e80c114354e1986106ef5678ec9541c181b038c",
+  "schema": "kosmic.work-receipt/1",
+  "status": "successful"
+}

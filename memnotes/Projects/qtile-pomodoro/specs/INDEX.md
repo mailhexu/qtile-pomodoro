@@ -1,11 +1,26 @@
 # Specifications
 
-- [Minimal Qtile Task Overlay PRD](prd.md) — approved 2026-09-04.
-- [Task Overlay Architecture](architecture.md) — approved 2026-09-04.
-- [Epic 1: Minimal Qtile Task Overlay](epics/epic-1-task-overlay.md) — approved 2026-09-04; stories 1-3 approved.
-- [Quick Task: Wrapped Task Text](quick-tasks/2026-09-09-wrapped-task-text.md) — done 2026-09-09.
-- [PRD: Undo Task Completion and Move](prd-task-undo.md) — approved 2026-09-09.
-- [Architecture: Local Task Undo](architecture-task-undo.md) — approved 2026-09-09.
-- [Epic 3: Local Task Undo](epics/epic-3-local-task-undo.md) — done 2026-09-09; story 7 done.
-- [Quick Task: Break Overlay Diagnostics](quick-tasks/2026-09-09-break-overlay-diagnostics.md) — in progress; awaiting user reproduction.
-- [Manual Breaks and Timer Control Panel PRD](../subprojects/manual-breaks-and-timer-control-panel/specs/prd.md) — approved; architecture planning.
+## Feature owners
+
+- [Minimal Qtile Task Overlay](../subprojects/minimal-qtile-task-overlay/specs/INDEX.md)
+- [Todoist Client Sync](../subprojects/prd-todoist-client-sync/specs/INDEX.md)
+- [Local Task Undo](../subprojects/prd-undo-task-completion-and-move/specs/INDEX.md)
+- [Manual Breaks and Timer Control Panel](../subprojects/manual-breaks-and-timer-control-panel/specs/INDEX.md) — PRD approved; architecture draft awaiting approval.
+
+Existing feature records retain their historical lifecycle states and acceptance
+notes; relocation does not grant new approvals or completion receipts.
+
+## Shared Quick Tasks
+
+- [Done section](quick-tasks/2026-09-04-done-section.md) — historical done state.
+- [Wrapped task text](quick-tasks/2026-09-09-wrapped-task-text.md) — historical done state.
+- [Break-overlay recurrence repair](quick-tasks/2026-09-09-break-overlay-diagnostics.md) — completed with retained receipt/evidence.
+- [Legacy feature-spec migration](quick-tasks/2026-10-15-legacy-feature-spec-migration.md) — completed with independent review and receipt.
+
+## Migration provenance
+
+- [Approved source-to-owner map](migration-plans/2026-10-15-owner-layout.json).
+
+The completed break-overlay repair record and its proof artifacts remain
+byte-for-byte unchanged. Legacy path mentions inside that immutable historical
+evidence are provenance; the migration map gives their current locations.

@@ -1,4 +1,15 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: prd-todoist-client-sync
+record_kind: prd
+local_id: "prd"
+linked_architecture: architecture.md
+linked_epics:
+  - epics/epic-001-todoist-sync.md
+linked_stories:
+  - stories/story-001-todoist-client.md
+  - stories/story-002-sync-engine.md
+  - stories/story-003-widget-wiring.md
 status: approved
 created: 2026-09-08
 updated: 2026-09-08

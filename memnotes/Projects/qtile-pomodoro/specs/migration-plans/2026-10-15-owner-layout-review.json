@@ -1,0 +1,20 @@
+{
+  "schema": "kosmic.work-review/1",
+  "identity": "qtile-pomodoro/quick-task/2026-10-15-legacy-feature-spec-migration",
+  "record_path": "specs/quick-tasks/2026-10-15-legacy-feature-spec-migration.md",
+  "review_base": "2d3bacbdec27eaf2af89732a709a77ef2b3b41da",
+  "reviewed_revision": "832c5bf4a27d894f82fc22ec9ab364a216d61c15000a3cbac96ad3ff9202f2be",
+  "round": 1,
+  "standards": {
+    "decision": "approved",
+    "reviewer": "MigrationStandardsReview",
+    "observation": "No blocking/nonblocking standards findings. Canonical identities, metadata/link conventions, preserved requirements/statuses/proof, registry/STATUS/ignore hygiene and no application changes reviewed. Static inspection only."
+  },
+  "spec": {
+    "decision": "approved",
+    "reviewer": "MigrationSpecReview",
+    "observation": "No findings. Exactly16 owner-local relocations, real ancestry/historical status retention, shared QuickTasks and immutable proof mapping meet approved migration scope; actual hash/workflow observations came from parent's integrated check, not invented reviewer test execution."
+  },
+  "findings": [],
+  "decision": "approved"
+}

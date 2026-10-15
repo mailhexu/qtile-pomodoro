@@ -1,0 +1,18 @@
+{
+  "directories": [
+    {
+      "authority": {
+        "record": "qtile-pomodoro/quick-task/2026-10-15-legacy-feature-spec-migration",
+        "run_id": "20261015T124141Z-workdir-register-qtile-p-c5bc29ad63d6d557d9a323cfd4f33f71"
+      },
+      "directory_id": "wd-41a626016dfea1bf",
+      "fixed_subproject_id": null,
+      "path": "/home/hexu/projects/qtile_pomodoro",
+      "registered_at": "2026-10-15T12:41:41Z",
+      "schema": "kosmic.workdir/1"
+    }
+  ],
+  "project_id": "qtile-pomodoro",
+  "schema": "kosmic.workdirs/1",
+  "sequence": 1
+}

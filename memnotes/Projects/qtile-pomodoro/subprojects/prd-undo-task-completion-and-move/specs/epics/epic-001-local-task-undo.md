@@ -1,10 +1,14 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: prd-undo-task-completion-and-move
+record_kind: epic
+local_id: "001"
 status: done
 created: 2026-09-09
 updated: 2026-09-09
-linked_prd: ../prd-task-undo.md
-linked_architecture: ../architecture-task-undo.md
-linked_stories: [../stories/story-7-local-task-undo.md]
+linked_prd: ../prd.md
+linked_architecture: ../architecture.md
+linked_stories: [../stories/story-001-local-task-undo.md]
 ---
 
 # Epic 3: Local Task Undo
@@ -33,7 +37,7 @@ move from the Qtile Task Overlay.
 
 | Story | Title | Status |
 |-------|-------|--------|
-| [Story 7](../stories/story-7-local-task-undo.md) | One-step local task undo | done |
+| [Story 7](../stories/story-001-local-task-undo.md) | One-step local task undo | done |
 
 ## Success Criteria
 

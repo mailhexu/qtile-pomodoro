@@ -1,4 +1,8 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: null
+record_kind: quick-task
+local_id: 2026-09-04-done-section
 status: done
 created: 2026-09-04
 updated: 2026-09-04

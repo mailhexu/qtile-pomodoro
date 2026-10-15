@@ -1,0 +1,41 @@
+{
+  "schema": "qtile-pomodoro.spec-layout-migration/1",
+  "governing_record": "qtile-pomodoro/quick-task/2026-10-15-legacy-feature-spec-migration",
+  "approval": "User explicitly approved all 16 legacy feature-spec relocations, metadata/link normalization and working-directory registration; no implementation or runtime changes.",
+  "records": [
+    {"source":"specs/prd.md","target":"subprojects/minimal-qtile-task-overlay/specs/prd.md","kind":"prd","local_id":"prd"},
+    {"source":"specs/architecture.md","target":"subprojects/minimal-qtile-task-overlay/specs/architecture.md","kind":"architecture","local_id":"architecture"},
+    {"source":"specs/epics/epic-1-task-overlay.md","target":"subprojects/minimal-qtile-task-overlay/specs/epics/epic-001-task-overlay.md","kind":"epic","local_id":"001"},
+    {"source":"specs/stories/story-1-task-store.md","target":"subprojects/minimal-qtile-task-overlay/specs/stories/story-001-task-store.md","kind":"story","local_id":"001"},
+    {"source":"specs/stories/story-2-today-count-widget.md","target":"subprojects/minimal-qtile-task-overlay/specs/stories/story-002-today-count-widget.md","kind":"story","local_id":"002"},
+    {"source":"specs/stories/story-3-task-overlay.md","target":"subprojects/minimal-qtile-task-overlay/specs/stories/story-003-task-overlay.md","kind":"story","local_id":"003"},
+    {"source":"specs/prd-todoist-sync.md","target":"subprojects/prd-todoist-client-sync/specs/prd.md","kind":"prd","local_id":"prd"},
+    {"source":"specs/architecture-todoist-sync.md","target":"subprojects/prd-todoist-client-sync/specs/architecture.md","kind":"architecture","local_id":"architecture"},
+    {"source":"specs/epics/epic-2-todoist-sync.md","target":"subprojects/prd-todoist-client-sync/specs/epics/epic-001-todoist-sync.md","kind":"epic","local_id":"001"},
+    {"source":"specs/stories/story-4-todoist-client.md","target":"subprojects/prd-todoist-client-sync/specs/stories/story-001-todoist-client.md","kind":"story","local_id":"001"},
+    {"source":"specs/stories/story-5-sync-engine.md","target":"subprojects/prd-todoist-client-sync/specs/stories/story-002-sync-engine.md","kind":"story","local_id":"002"},
+    {"source":"specs/stories/story-6-widget-wiring.md","target":"subprojects/prd-todoist-client-sync/specs/stories/story-003-widget-wiring.md","kind":"story","local_id":"003"},
+    {"source":"specs/prd-task-undo.md","target":"subprojects/prd-undo-task-completion-and-move/specs/prd.md","kind":"prd","local_id":"prd"},
+    {"source":"specs/architecture-task-undo.md","target":"subprojects/prd-undo-task-completion-and-move/specs/architecture.md","kind":"architecture","local_id":"architecture"},
+    {"source":"specs/epics/epic-3-local-task-undo.md","target":"subprojects/prd-undo-task-completion-and-move/specs/epics/epic-001-local-task-undo.md","kind":"epic","local_id":"001"},
+    {"source":"specs/stories/story-7-local-task-undo.md","target":"subprojects/prd-undo-task-completion-and-move/specs/stories/story-001-local-task-undo.md","kind":"story","local_id":"001"}
+  ],
+  "publication_rules": [
+    "Canonical story directory is stories/, not the planner's storys/ typo.",
+    "Restore Todoist ancestry from its existing Parent links; do not invent approvals.",
+    "Preserve lifecycle states and requirements; only identity/ancestry/path metadata and link destinations change.",
+    "Normalize shared Quick Tasks without existing receipts; do not fabricate missing historical receipts.",
+    "Preserve completed break-overlay repair record and its receipt/proof artifacts byte-for-byte; historic path mentions resolve through this retained source-to-target map rather than runtime aliases.",
+    "Bind only the approved working directory /home/hexu/projects/qtile_pomodoro; generated lock/scratch files are ignored, registration records and STATUS are governed metadata.",
+    "Do not modify installed Kosmic code or application/runtime/task settings."
+  ],
+  "preserved_application_fingerprint": "825f5c285abf739b53a6e5d69ed472d088cf37e5de7e53bd95d243dc0979beba",
+  "application_fingerprint_command": "git ls-files -z -- src tests README.md docs CONTEXT.md pyproject.toml uv.lock | xargs -0 sha256sum | sha256sum",
+  "immutable_artifacts": [
+    {"path":"specs/quick-tasks/2026-09-09-break-overlay-diagnostics.md","sha256":"a48c96ef8679aef1281d5efb47e0e33c00a525adfe7e240049d75e3482dcdb8a"},
+    {"path":"specs/quick-tasks/2026-10-12-break-overlay-acceptance.json","sha256":"3e8f993891bca9e1ceac7cf638dcd50be4854fa6953625165ee82432dc89622a"},
+    {"path":"specs/quick-tasks/2026-10-12-break-overlay-review.json","sha256":"d81edf21a85dd56cb5acfb3e729d93e22377afcc2183a041c22e0b53f14d1151"},
+    {"path":"log/qtile-pomodoro-2026-10-12.md","sha256":"bb4b4cf7bbb03f2641da0757e5e5a9cdddc2414b4b1b0846479a2ae0c0e15ef0"},
+    {"path":".kosmic/work-receipts/6ca95bca79dd6c74.json","sha256":"755800f45c6dd2f22d477dd96cd866539bd2b146fb9ccef7be508bc373f352a2"}
+  ]
+}

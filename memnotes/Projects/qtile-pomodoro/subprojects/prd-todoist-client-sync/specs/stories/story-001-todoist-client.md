@@ -1,4 +1,11 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: prd-todoist-client-sync
+record_kind: story
+local_id: "001"
+linked_prd: ../prd.md
+linked_architecture: ../architecture.md
+linked_epic: ../epics/epic-001-todoist-sync.md
 status: approved
 created: 2026-09-08
 updated: 2026-09-08
@@ -6,7 +13,7 @@ updated: 2026-09-08
 
 # Story 1: TodoistClient + live API probe
 
-Parent: [Epic 2](../epics/epic-2-todoist-sync.md) | [Architecture](../architecture-todoist-sync.md)
+Parent: [Epic 2](../epics/epic-001-todoist-sync.md) | [Architecture](../architecture.md)
 
 ## User Story
 

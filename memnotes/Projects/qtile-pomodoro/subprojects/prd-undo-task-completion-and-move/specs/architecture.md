@@ -1,10 +1,15 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: prd-undo-task-completion-and-move
+record_kind: architecture
+local_id: architecture
 status: approved
 created: 2026-09-09
 updated: 2026-09-09
-linked_prd: prd-task-undo.md
+linked_prd: prd.md
 linked_research: []
-linked_stories: [../stories/story-7-local-task-undo.md]
+linked_epics: [epics/epic-001-local-task-undo.md]
+linked_stories: [stories/story-001-local-task-undo.md]
 ---
 
 # Architecture: Local Task Undo

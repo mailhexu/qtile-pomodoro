@@ -3,7 +3,7 @@ project_id: qtile-pomodoro
 subproject_id: null
 record_kind: quick-task
 local_id: 2026-10-15-legacy-feature-spec-migration
-status: approved
+status: done
 created: 2026-10-15
 updated: 2026-10-15
 consumer_interface_change: false
@@ -12,9 +12,11 @@ routine_edge_change: false
 routine_decision_required: false
 routine_proposals: []
 review_base: 2d3bacbdec27eaf2af89732a709a77ef2b3b41da
-review_round: 0
-acceptance_evidence: []
-review_record: ""
+review_round: 1
+acceptance_evidence:
+  - specs/migration-plans/2026-10-15-owner-layout-acceptance.json
+review_record: specs/migration-plans/2026-10-15-owner-layout-review.json
+registration_root: /home/hexu/projects/qtile_pomodoro
 registration_outputs:
   - .kosmic/working-directories.json
   - worktree:.kosmic/workdir.json
@@ -65,12 +67,12 @@ completed repair record or disabling a catalog guard.
 
 ## Acceptance Criteria
 
-- [ ] All 16 feature records have one canonical owner-local identity and valid ancestry; no flat feature specs or runtime aliases remain.
-- [ ] Requirements, lifecycle states and immutable repair evidence are preserved.
-- [ ] Active relative links resolve to migrated records/shared knowledge; historical path references have an explicit retained mapping.
-- [ ] Catalog loading, directory registration and STATUS generation succeed without suppressing guards.
-- [ ] No application source, installed tooling, runtime configuration, timer state or task data changed.
-- [ ] Independent migration review passes and observed acceptance evidence is recorded.
+- [x] All 16 feature records have one canonical owner-local identity and valid ancestry; no flat feature specs or runtime aliases remain.
+- [x] Requirements, lifecycle states and immutable repair evidence are preserved.
+- [x] Active relative links resolve to migrated records/shared knowledge; historical path references have an explicit retained mapping.
+- [x] Catalog loading, directory registration and STATUS generation succeed without suppressing guards.
+- [x] No application source, installed tooling, runtime configuration, timer state or task data changed.
+- [x] Independent migration review passes and observed acceptance evidence is recorded.
 
 ## Routine Decision
 
@@ -79,4 +81,9 @@ No reusable routine edge is added or materially changed.
 
 ## Verification
 
-Acceptance observations and independent review will be recorded before completion.
+- Integrated catalog/link/body/status/immutable-hash check passed for all16 moves.
+- Supported registration and STATUS generation passed; actual dashboard inspected.
+- Normal owner-local architecture creation now succeeds without guard bypass.
+- Independent Standards and Spec reviews approved round1 with no findings.
+- Details and retained hashes: [migration observations](../../log/qtile-pomodoro-2026-10-15-spec-migration.md).
+- Completion is published only by work finish; no terminal status is assigned manually.

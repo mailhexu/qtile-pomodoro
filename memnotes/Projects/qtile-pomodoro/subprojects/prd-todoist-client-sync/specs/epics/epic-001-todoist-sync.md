@@ -1,4 +1,14 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: prd-todoist-client-sync
+record_kind: epic
+local_id: "001"
+linked_prd: ../prd.md
+linked_architecture: ../architecture.md
+linked_stories:
+  - ../stories/story-001-todoist-client.md
+  - ../stories/story-002-sync-engine.md
+  - ../stories/story-003-widget-wiring.md
 status: done
 created: 2026-09-08
 updated: 2026-09-08
@@ -6,7 +16,7 @@ updated: 2026-09-08
 
 # Epic 2: Todoist Client Sync
 
-Parent: [Architecture: Todoist Client Sync](../architecture-todoist-sync.md) (approved 2026-09-08)
+Parent: [Architecture: Todoist Client Sync](../architecture.md) (approved 2026-09-08)
 
 ## Narrative
 

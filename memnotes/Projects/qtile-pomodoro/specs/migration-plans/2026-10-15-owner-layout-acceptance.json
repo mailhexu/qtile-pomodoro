@@ -1,0 +1,43 @@
+{
+  "schema": "kosmic.acceptance-evidence/1",
+  "identity": "qtile-pomodoro/quick-task/2026-10-15-legacy-feature-spec-migration",
+  "record_path": "specs/quick-tasks/2026-10-15-legacy-feature-spec-migration.md",
+  "results": [
+    {
+      "criterion": "All 16 feature records have one canonical owner-local identity and valid ancestry; no flat feature specs or runtime aliases remain.",
+      "outcome": "passed",
+      "observation": "Integrated SpecCatalog check found all 16 mapped targets with expected PRD/architecture/epic/story ancestry depths, removed source paths, and three canonical owners; no aliases or storys/ paths were used.",
+      "artifacts": [{"path":"log/qtile-pomodoro-2026-10-15-spec-migration.md","sha256":"3c24401801e08c7e7abf308ba5bfe5d9f82df6c32e75655aa26dde8f8fef7f7f"},{"path":"specs/migration-plans/2026-10-15-owner-layout.json","sha256":"e20471e9f097753479214449c3163cf8cdcc06c3790df539c46ca65e1eff4b1a"}]
+    },
+    {
+      "criterion": "Requirements, lifecycle states and immutable repair evidence are preserved.",
+      "outcome": "passed",
+      "observation": "Compared all16 original baseline records to destinations: statuses unchanged and body text equal after masking Markdown link destinations only. All five original repair artifacts match retained SHA256 values; old done-without-receipt records remain visibly receipt pending.",
+      "artifacts": [{"path":"log/qtile-pomodoro-2026-10-15-spec-migration.md","sha256":"3c24401801e08c7e7abf308ba5bfe5d9f82df6c32e75655aa26dde8f8fef7f7f"}]
+    },
+    {
+      "criterion": "Active relative links resolve to migrated records/shared knowledge; historical path references have an explicit retained mapping.",
+      "outcome": "passed",
+      "observation": "Integrated check resolved active metadata/Markdown links in migrated records, owner/project indexes, owner entries and normalized shared QuickTask; immutable historical paths are mapped by the manifest instead of editing proof or retaining aliases.",
+      "artifacts": [{"path":"log/qtile-pomodoro-2026-10-15-spec-migration.md","sha256":"3c24401801e08c7e7abf308ba5bfe5d9f82df6c32e75655aa26dde8f8fef7f7f"}]
+    },
+    {
+      "criterion": "Catalog loading, directory registration and STATUS generation succeed without suppressing guards.",
+      "outcome": "passed",
+      "observation": "Catalog loaded21 records before architecture publication; supported workdir-register published wd-41a626016dfea1bf; generate-status wrote and inspection observed canonical owner-local STATUS. Ordinary derived architecture spec-create then succeeded under the approved new PRD without disabling its guard.",
+      "artifacts": [{"path":"log/qtile-pomodoro-2026-10-15-spec-migration.md","sha256":"3c24401801e08c7e7abf308ba5bfe5d9f82df6c32e75655aa26dde8f8fef7f7f"}]
+    },
+    {
+      "criterion": "No application source, installed tooling, runtime configuration, timer state or task data changed.",
+      "outcome": "passed",
+      "observation": "Tracked application source/tests/README/docs/CONTEXT/pyproject/lock aggregate fingerprint unchanged at825f5c285abf739b53a6e5d69ed472d088cf37e5de7e53bd95d243dc0979beba. Writes were scoped to repository governance/spec metadata and ignore rules only; no application/installed-tool/runtime commands or writes were performed.",
+      "artifacts": [{"path":"log/qtile-pomodoro-2026-10-15-spec-migration.md","sha256":"3c24401801e08c7e7abf308ba5bfe5d9f82df6c32e75655aa26dde8f8fef7f7f"}]
+    },
+    {
+      "criterion": "Independent migration review passes and observed acceptance evidence is recorded.",
+      "outcome": "passed",
+      "observation": "MigrationStandardsReview and MigrationSpecReview independently approved with no findings. Their static inspections are distinguished from parent-run integrated checks. The declared review object pins reviewed source revision832c5bf4a27d894f82fc22ec9ab364a216d61c15000a3cbac96ad3ff9202f2be.",
+      "artifacts": [{"path":"log/qtile-pomodoro-2026-10-15-spec-migration.md","sha256":"3c24401801e08c7e7abf308ba5bfe5d9f82df6c32e75655aa26dde8f8fef7f7f"}]
+    }
+  ]
+}

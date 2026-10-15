@@ -1,11 +1,15 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: minimal-qtile-task-overlay
+record_kind: story
+local_id: "003"
 status: done
 created: 2026-09-04
 updated: 2026-09-04
-linked_epic: ../epics/epic-1-task-overlay.md
+linked_epic: ../epics/epic-001-task-overlay.md
 linked_architecture: ../architecture.md
 linked_prd: ../prd.md
-related_notes: [../../notes/qtile-integration.md]
+related_notes: [../../../../notes/qtile-integration.md]
 consumer_interface_change: true
 review_base: ""
 review_round: 0

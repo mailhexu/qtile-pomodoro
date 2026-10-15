@@ -1,6 +1,7 @@
 ---
 project_id: qtile-pomodoro
 working_state: working-tree
+status_root: /home/hexu/projects/qtile_pomodoro
 ---
 
 # qtile-pomodoro

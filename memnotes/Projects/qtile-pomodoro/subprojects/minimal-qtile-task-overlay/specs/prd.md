@@ -1,9 +1,13 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: minimal-qtile-task-overlay
+record_kind: prd
+local_id: prd
 status: approved
 created: 2026-09-04
 updated: 2026-09-04
 linked_research: []
-linked_epics: []
+linked_epics: [epics/epic-001-task-overlay.md]
 ---
 
 # Minimal Qtile Task Overlay

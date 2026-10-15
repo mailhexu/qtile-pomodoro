@@ -1,11 +1,15 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: minimal-qtile-task-overlay
+record_kind: story
+local_id: "002"
 status: done
 created: 2026-09-04
 updated: 2026-09-04
-linked_epic: ../epics/epic-1-task-overlay.md
+linked_epic: ../epics/epic-001-task-overlay.md
 linked_architecture: ../architecture.md
 linked_prd: ../prd.md
-related_notes: [../../notes/qtile-integration.md]
+related_notes: [../../../../notes/qtile-integration.md]
 consumer_interface_change: true
 review_base: ""
 review_round: 0
@@ -54,7 +58,7 @@ So that task status is always glanceable and one click away.
 
 ## Technical Notes
 
-Follow the verified `InLoopPollText` pattern (see [Qtile Integration Constraints](../../notes/qtile-integration.md)); never use `ThreadPoolText`. Poll reads must not raise when the JSON is briefly mid-replace (atomic replace makes this a non-issue; still guard with try/except). Config changes require Qtile restart, not reload.
+Follow the verified `InLoopPollText` pattern (see [Qtile Integration Constraints](../../../../notes/qtile-integration.md)); never use `ThreadPoolText`. Poll reads must not raise when the JSON is briefly mid-replace (atomic replace makes this a non-issue; still guard with try/except). Config changes require Qtile restart, not reload.
 
 ## Assumptions & Verification
 

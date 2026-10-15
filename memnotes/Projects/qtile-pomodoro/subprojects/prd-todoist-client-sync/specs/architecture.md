@@ -1,4 +1,15 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: prd-todoist-client-sync
+record_kind: architecture
+local_id: "architecture"
+linked_prd: prd.md
+linked_epics:
+  - epics/epic-001-todoist-sync.md
+linked_stories:
+  - stories/story-001-todoist-client.md
+  - stories/story-002-sync-engine.md
+  - stories/story-003-widget-wiring.md
 status: approved
 created: 2026-09-08
 updated: 2026-09-08
@@ -6,7 +17,7 @@ updated: 2026-09-08
 
 # Architecture: Todoist Client Sync
 
-Parent: [PRD: Todoist Sync](prd-todoist-sync.md) (approved 2026-09-08)
+Parent: [PRD: Todoist Sync](prd.md) (approved 2026-09-08)
 Review: round 1 FAIL, round 2 FAIL — v3 retargets Unified API v1 and fixes
 all open findings; round 3 pending.
 

@@ -1,12 +1,16 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: prd-undo-task-completion-and-move
+record_kind: story
+local_id: "001"
 status: done
 created: 2026-09-09
 updated: 2026-09-09
-linked_prd: ../prd-task-undo.md
-linked_architecture: ../architecture-task-undo.md
-linked_epic: ../epics/epic-3-local-task-undo.md
+linked_prd: ../prd.md
+linked_architecture: ../architecture.md
+linked_epic: ../epics/epic-001-local-task-undo.md
 related_notes:
-  - ../../notes/using-the-task-overlay.md
+  - ../../../../notes/using-the-task-overlay.md
 consumer_interface_change: true
 review_base: a00a406447ac67956ab416587c666149cf893d51
 review_round: 3

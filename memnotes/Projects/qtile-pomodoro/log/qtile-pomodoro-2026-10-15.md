@@ -26,3 +26,29 @@ Qualified identity: `qtile-pomodoro/manual-breaks-and-timer-control-panel/prd/pr
   required procedure-skill availability. This is planning-only: no source,
   runtime timer state, settings, or user tasks were changed; no behavioral test
   or live timer operation was needed for this draft.
+
+## PRD Approval and Architecture Proposal
+
+- User approved the PRD; its status is now approved, not an implementation grant.
+- Three read-only interface designs compared a minimal command facade, typed
+  phase/operation variants, and a shared asynchronous presentation controller.
+- Selected the smaller daemon command facade plus one shared async Qtile
+  controller. Draft covers persisted held focus/original duration, transactional
+  completion, durable settings saves and one coordinated panel/overlay focus owner.
+- Proposed one new non-GUI dependency, TOMLKit, based on primary documentation;
+  no dependency or application-specific preservation behavior was installed/tested.
+- Explicit Controls access during breaks/gates keeps pause/settings reachable
+  without allowing stale panels to obscure the authoritative full-screen surface.
+- Independent core/UI preflight reviewers found two design gaps: file/directory
+  synchronization and screen-reconfiguration resource reconciliation. Both were
+  corrected and approved in focused round-2 documentary re-review.
+- The separate, user-approved full spec migration completed with its own
+  evidence, reviews and receipt. Working-directory STATUS is now bound/generated;
+  application source and the prior timer-repair proof artifacts remained unchanged.
+- Architecture remains draft; epics/stories/code/deployment await their gates.
+- After migration completion, a spec-event STATUS refresh using the draft
+  architecture identity was refused as WORK_PHASE_DENIED (the installed helper
+  accepts implementation records, despite the documented planning workflow).
+  Reported through automated QA; did not reopen a terminal record or change
+  installed tooling. The successful migration finish had already regenerated
+  STATUS with the approved PRD, draft architecture/research and completed migration.

@@ -1,11 +1,15 @@
 ---
+project_id: qtile-pomodoro
+subproject_id: null
+record_kind: quick-task
+local_id: 2026-09-09-wrapped-task-text
 status: done
 created: 2026-09-09
 updated: 2026-09-09
 related_notes:
   - ../../notes/using-the-task-overlay.md
 related_specs:
-  - ../architecture.md
+  - ../../subprojects/minimal-qtile-task-overlay/specs/architecture.md
 related_files:
   - ../../../../../src/qtile_pomodoro/task_widget.py
 consumer_interface_change: true
@@ -64,7 +68,7 @@ height for rendering, selection, and hit testing.
 ## Links
 
 - Related notes: [Using the Task Overlay](../../notes/using-the-task-overlay.md)
-- Related specs: [Task Overlay Architecture](../architecture.md)
+- Related specs: [Task Overlay Architecture](../../subprojects/minimal-qtile-task-overlay/specs/architecture.md)
 - Related files: `src/qtile_pomodoro/task_widget.py`
 
 ## Code Review
