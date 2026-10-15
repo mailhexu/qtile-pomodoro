@@ -8,4 +8,4 @@
 - [Architecture: Local Task Undo](architecture-task-undo.md) — approved 2026-09-09.
 - [Epic 3: Local Task Undo](epics/epic-3-local-task-undo.md) — done 2026-09-09; story 7 done.
 - [Quick Task: Break Overlay Diagnostics](quick-tasks/2026-09-09-break-overlay-diagnostics.md) — in progress; awaiting user reproduction.
-- [Manual Breaks and Timer Control Panel PRD](../subprojects/manual-breaks-and-timer-control-panel/specs/prd.md) — draft; awaiting approval.
+- [Manual Breaks and Timer Control Panel PRD](../subprojects/manual-breaks-and-timer-control-panel/specs/prd.md) — approved; architecture planning.

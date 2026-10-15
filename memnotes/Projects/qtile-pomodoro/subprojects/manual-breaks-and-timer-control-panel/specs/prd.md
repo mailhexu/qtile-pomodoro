@@ -3,7 +3,7 @@ project_id: qtile-pomodoro
 subproject_id: manual-breaks-and-timer-control-panel
 record_kind: prd
 local_id: prd
-status: draft
+status: approved
 created: 2026-10-15
 updated: 2026-10-15
 linked_research: []
